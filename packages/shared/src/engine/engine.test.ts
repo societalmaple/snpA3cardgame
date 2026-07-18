@@ -131,6 +131,100 @@ describe('combat and victory', () => {
   });
 });
 
+describe('strength consumption and unequip', () => {
+  it('discards equipped Strengths when a Situation is solved, but keeps Friend/Club', () => {
+    const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 4242);
+    const sitId = base.situationDeck.find((id) => {
+      const c = cardOf(id);
+      return c?.type === 'situation' && c.difficulty <= 3;
+    })!;
+    const s: GameState = {
+      ...base,
+      phase: 'combat',
+      currentPlayerIndex: 0,
+      activeSituation: { cardId: sitId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      turnFlags: { enteredCombatThisTurn: true },
+      players: base.players.map((p) =>
+        p.id === 'p1'
+          ? { ...p, level: 5, strengths: ['str-01__900', 'str-02__901'], friendId: 'fnd-01__902', clubId: 'club-01__903', experienceHand: [], situationHand: [] }
+          : p,
+      ),
+    };
+    const res = applyAction(s, { type: 'RESOLVE_COMBAT', playerId: 'p1' });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const p1 = res.state.players.find((p) => p.id === 'p1')!;
+    expect(p1.strengths).toEqual([]); // strengths consumed
+    expect(p1.friendId).toBe('fnd-01__902'); // friend kept
+    expect(p1.clubId).toBe('club-01__903'); // club kept
+    expect(res.state.experienceDiscard).toEqual(expect.arrayContaining(['str-01__900', 'str-02__901']));
+  });
+
+  it('keeps equipped Strengths when the solve attempt fails', () => {
+    const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 4243);
+    const hardId = base.situationDeck.find((id) => {
+      const c = cardOf(id);
+      return c?.type === 'situation' && c.difficulty >= 5 && c.consequences.every((e) => e.type === 'LOSE_LEVEL');
+    })!;
+    const s: GameState = {
+      ...base,
+      phase: 'combat',
+      currentPlayerIndex: 0,
+      activeSituation: { cardId: hardId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      turnFlags: { enteredCombatThisTurn: true },
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: 1, strengths: ['str-05__900'] } : p)),
+    };
+    const res = applyAction(s, { type: 'RESOLVE_COMBAT', playerId: 'p1' });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.state.players.find((p) => p.id === 'p1')!.strengths).toEqual(['str-05__900']);
+  });
+
+  it('unequips a Strength back into the experience hand', () => {
+    const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 900);
+    const s: GameState = {
+      ...base,
+      phase: 'main',
+      currentPlayerIndex: 0,
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, strengths: ['str-08__900'], experienceHand: [], situationHand: [] } : p)),
+    };
+    const res = applyAction(s, { type: 'UNEQUIP_CARD', playerId: 'p1', cardId: 'str-08__900' });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const p1 = res.state.players.find((p) => p.id === 'p1')!;
+    expect(p1.strengths).toEqual([]);
+    expect(p1.experienceHand).toEqual(['str-08__900']);
+  });
+
+  it('unequips a Club back into the situation hand', () => {
+    const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 901);
+    const s: GameState = {
+      ...base,
+      phase: 'main',
+      currentPlayerIndex: 0,
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, clubId: 'club-02__900', situationHand: [], experienceHand: [] } : p)),
+    };
+    const res = applyAction(s, { type: 'UNEQUIP_CARD', playerId: 'p1', cardId: 'club-02__900' });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const p1 = res.state.players.find((p) => p.id === 'p1')!;
+    expect(p1.clubId).toBeNull();
+    expect(p1.situationHand).toEqual(['club-02__900']);
+  });
+
+  it('rejects unequip when the hand is already full', () => {
+    const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 902);
+    const fullHand = Array.from({ length: HAND_LIMIT }, (_, i) => `str-01__${800 + i}`);
+    const s: GameState = {
+      ...base,
+      phase: 'main',
+      currentPlayerIndex: 0,
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, strengths: ['str-02__950'], experienceHand: fullHand, situationHand: [] } : p)),
+    };
+    expect(applyAction(s, { type: 'UNEQUIP_CARD', playerId: 'p1', cardId: 'str-02__950' }).ok).toBe(false);
+  });
+});
+
 describe('hand limit', () => {
   it('drawing over the limit forces a discard, and you choose what to keep', () => {
     const base = twoPlayers();

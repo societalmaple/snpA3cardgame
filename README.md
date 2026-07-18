@@ -82,6 +82,10 @@ boost your total, or **ask another player for help** (their bonuses join yours; 
 keep all the levels, they get the Experience you offered). If you don't fight at all
 this turn, you draw one Experience card instead ("gain problem-solving ability").
 
+**Strengths are single-use:** whichever Strengths you have equipped when you *solve*
+a Situation are used up and discarded (Friends and Clubs stay). You can also
+**unequip** any equipped card during your turn to return it to your hand.
+
 **First to Level 15 wins — but only if that final level came from solving a
 Situation.** Go-Up-A-Level cards can carry you to Level 14 but never win the game.
 
@@ -98,6 +102,7 @@ toss the new card or an older one.
 - Reconnect after a refresh/drop via a saved session token (while the server is up).
 - Illegal moves are rejected server-side; the UI only offers legal actions.
 - 6-card hand limit with a choose-what-to-keep discard step when you go over.
+- Equip/unequip cards; Strengths are consumed when you solve a Situation.
 - Data-driven cards — no per-card code.
 
 ## Project layout

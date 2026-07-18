@@ -69,6 +69,9 @@ apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
 - **Hand limit.** Max `HAND_LIMIT` cards across both hands. Drawing over it routes the
   player into a `discard` phase (`DISCARD_CARD` action) that resumes the prior phase
   once they're back at/under the limit — so they choose what to keep.
+- **Strengths are consumed** when a Situation is solved (RESOLVE_COMBAT win discards
+  the winner's equipped Strengths; Friends/Clubs stay). `UNEQUIP_CARD` returns an
+  equipped card to its hand (Strength/Friend → experience hand, Club → situation hand).
 - `protocol.ts` is the typed Socket.IO contract shared by both ends.
 
 ### `apps/server`

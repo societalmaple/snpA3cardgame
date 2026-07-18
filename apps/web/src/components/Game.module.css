@@ -255,6 +255,12 @@
   letter-spacing: 0.05em;
   color: #9aa0b5;
 }
+.hintInline {
+  text-transform: none;
+  letter-spacing: normal;
+  color: #56b6c2;
+  font-style: normal;
+}
 .cardRow {
   display: flex;
   gap: 0.5rem;

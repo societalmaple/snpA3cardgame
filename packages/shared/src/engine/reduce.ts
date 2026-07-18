@@ -22,6 +22,7 @@ export type Action =
   | { type: 'RESPOND_TO_HELP'; playerId: PlayerId; accept: boolean }
   | { type: 'RESOLVE_COMBAT'; playerId: PlayerId }
   | { type: 'DISCARD_CARD'; playerId: PlayerId; cardId: CardInstanceId }
+  | { type: 'UNEQUIP_CARD'; playerId: PlayerId; cardId: CardInstanceId }
   | { type: 'END_TURN'; playerId: PlayerId };
 
 export type ActionType = Action['type'];
@@ -49,6 +50,11 @@ function drawExperienceTo(state: GameState, playerId: PlayerId, n: number): Game
 /** Total cards a player holds across both hands. */
 function handSize(p: PlayerState): number {
   return p.situationHand.length + p.experienceHand.length;
+}
+
+/** All currently-equipped card instances (strengths, friend, club). */
+function equippedCards(p: PlayerState): CardInstanceId[] {
+  return [...p.strengths, ...(p.friendId ? [p.friendId] : []), ...(p.clubId ? [p.clubId] : [])];
 }
 
 /**
@@ -200,6 +206,34 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
       }
     }
 
+    case 'UNEQUIP_CARD': {
+      if (!isCurrent) return fail('Not your turn.');
+      if (state.phase !== 'combat' && state.phase !== 'main') {
+        return fail('You can only unequip during combat or your main phase.');
+      }
+      const isStrength = cur.strengths.includes(action.cardId);
+      const isFriend = cur.friendId === action.cardId;
+      const isClub = cur.clubId === action.cardId;
+      if (!isStrength && !isFriend && !isClub) return fail('That card is not equipped.');
+      if (handSize(cur) >= HAND_LIMIT) return fail('Your hand is full — make room before unequipping.');
+      const card = cardOf(action.cardId);
+
+      let s: GameState;
+      if (isStrength) {
+        s = updatePlayer(state, cur.id, (p) => ({
+          ...p,
+          strengths: removeFirst(p.strengths, action.cardId),
+          experienceHand: [...p.experienceHand, action.cardId],
+        }));
+      } else if (isFriend) {
+        s = updatePlayer(state, cur.id, (p) => ({ ...p, friendId: null, experienceHand: [...p.experienceHand, action.cardId] }));
+      } else {
+        // A Club returns to the Situation hand (where Clubs are held).
+        s = updatePlayer(state, cur.id, (p) => ({ ...p, clubId: null, situationHand: [...p.situationHand, action.cardId] }));
+      }
+      return done(pushLog(s, `${cur.name} unequips ${card?.name ?? 'a card'}.`, cur.id));
+    }
+
     case 'ASK_FOR_HELP': {
       if (!isCurrent) return fail('Not your turn.');
       if (state.phase !== 'combat') return fail('You can only ask for help during combat.');
@@ -259,6 +293,15 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
           `${cur.name} solves ${situation.name}! (${math.total} vs ${math.difficulty}) +${situation.reward.level} level → ${newLevel}.`,
           cur.id,
         );
+
+        // Strengths are spent when used to solve a Situation — discard the equipped
+        // ones. Friends and Clubs stay equipped.
+        const usedStrengths = cur.strengths;
+        if (usedStrengths.length > 0) {
+          s = updatePlayer(s, cur.id, (p) => ({ ...p, strengths: [] }));
+          s = { ...s, experienceDiscard: [...s.experienceDiscard, ...usedStrengths] };
+          s = pushLog(s, `${cur.name}'s ${usedStrengths.length} Strength(s) were used up and discarded.`, cur.id);
+        }
 
         const totalExp = situation.reward.experience;
         const toHelper = active.helperId ? Math.min(active.helperOfferedExperience, totalExp) : 0;
@@ -351,6 +394,7 @@ export interface LegalActions {
   canEndTurn: boolean;
   mustDiscard: boolean;
   discardable: CardInstanceId[]; // cards you may discard while over the hand limit
+  unequippable: CardInstanceId[]; // equipped cards you may return to your hand
 }
 
 function emptyLegal(): LegalActions {
@@ -365,6 +409,7 @@ function emptyLegal(): LegalActions {
     canEndTurn: false,
     mustDiscard: false,
     discardable: [],
+    unequippable: [],
   };
 }
 
@@ -404,6 +449,7 @@ export function getLegalActions(state: GameState, playerId: PlayerId): LegalActi
       return legal;
     case 'combat': {
       legal.playableCards = playableFromHand(player);
+      legal.unequippable = handSize(player) < HAND_LIMIT ? equippedCards(player) : [];
       const hasHelper = !!state.activeSituation?.helperId;
       legal.helpTargets = hasHelper ? [] : state.players.filter((p) => p.id !== playerId && p.connected).map((p) => p.id);
       legal.canAskForHelp = !hasHelper && legal.helpTargets.length > 0;
@@ -412,6 +458,7 @@ export function getLegalActions(state: GameState, playerId: PlayerId): LegalActi
     }
     case 'main':
       legal.playableCards = playableFromHand(player);
+      legal.unequippable = handSize(player) < HAND_LIMIT ? equippedCards(player) : [];
       legal.canEndTurn = true;
       return legal;
     case 'discard':

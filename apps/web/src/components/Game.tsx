@@ -18,6 +18,9 @@ export function Game({ view }: { view: PlayerView }) {
 
   const opponents = view.players.filter((p) => p.id !== me);
   const self = view.players.find((p) => p.id === me);
+  const equipped = self
+    ? [...self.strengths, ...(self.friendId ? [self.friendId] : []), ...(self.clubId ? [self.clubId] : [])]
+    : [];
 
   const clickable = (id: CardInstanceId) =>
     legal.playableSituations.includes(id) ||
@@ -188,12 +191,19 @@ export function Game({ view }: { view: PlayerView }) {
         </div>
 
         <div className={styles.equipped}>
-          <span className={styles.zoneLabel}>Equipped</span>
+          <span className={styles.zoneLabel}>
+            Equipped{legal.unequippable.length > 0 && <em className={styles.hintInline}> · click to unequip</em>}
+          </span>
           <div className={styles.cardRow}>
-            {self?.strengths.map((id) => <PlaceholderCard key={id} id={id} size="sm" />)}
-            {self?.friendId && <PlaceholderCard id={self.friendId} size="sm" />}
-            {self?.clubId && <PlaceholderCard id={self.clubId} size="sm" />}
-            {!self?.strengths.length && !self?.friendId && !self?.clubId && <span className={styles.empty}>nothing equipped</span>}
+            {equipped.map((id) => (
+              <PlaceholderCard
+                key={id}
+                id={id}
+                size="sm"
+                onClick={legal.unequippable.includes(id) ? () => act({ type: 'UNEQUIP_CARD', playerId: me, cardId: id }) : undefined}
+              />
+            ))}
+            {!equipped.length && <span className={styles.empty}>nothing equipped</span>}
           </div>
         </div>
 
