@@ -1,5 +1,5 @@
 import { cardOf, type CardInstanceId } from '@school-days/shared';
-import { TYPE_LABEL, statLine } from '../cardDisplay.ts';
+import { TYPE_LABEL, statLine, formatEffects } from '../cardDisplay.ts';
 import styles from './PlaceholderCard.module.css';
 
 interface Props {
@@ -36,6 +36,9 @@ export function PlaceholderCard({ id, onClick, selected, disabled, size = 'md' }
       <span className={styles.art}>{card.art}</span>
       <span className={styles.name}>{card.name}</span>
       <span className={styles.stat}>{statLine(card)}</span>
+      {card.type === 'situation' && card.consequences.length > 0 && (
+        <span className={styles.consequence}>Fail: {formatEffects(card.consequences)}</span>
+      )}
     </button>
   );
 }

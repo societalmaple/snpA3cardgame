@@ -1,4 +1,4 @@
-import { cardOf, type Card, type CardType, type CardInstanceId } from '@school-days/shared';
+import { cardOf, type Card, type CardType, type CardInstanceId, type Effect } from '@school-days/shared';
 
 export const TYPE_LABEL: Record<CardType, string> = {
   situation: 'Situation',
@@ -32,4 +32,31 @@ export function statLine(card: Card): string {
 
 export function cardName(id: CardInstanceId): string {
   return cardOf(id)?.name ?? id;
+}
+
+/** Human-readable text for a single data-driven effect. */
+export function formatEffect(effect: Effect): string {
+  switch (effect.type) {
+    case 'GAIN_LEVEL':
+      return `+${effect.amount} level`;
+    case 'LOSE_LEVEL':
+      return `−${effect.amount} level`;
+    case 'GAIN_EXPERIENCE':
+      return `draw ${effect.amount} exp`;
+    case 'DISCARD_EXPERIENCE':
+      return `discard ${effect.amount} exp`;
+    case 'DISCARD_SITUATION':
+      return `discard ${effect.amount} situation`;
+    case 'LOSE_STRENGTH':
+      return `lose ${effect.amount} strength`;
+    case 'LOSE_FRIEND':
+      return 'lose friend';
+    case 'LOSE_CLUB':
+      return 'lose club';
+  }
+}
+
+/** Comma-separated summary of an effect list (e.g. a situation's consequences). */
+export function formatEffects(effects: readonly Effect[]): string {
+  return effects.map(formatEffect).join(', ');
 }

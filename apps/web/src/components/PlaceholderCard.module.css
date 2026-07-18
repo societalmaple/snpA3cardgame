@@ -70,6 +70,11 @@
   color: #aab0c6;
   line-height: 1.2;
 }
+.consequence {
+  font-size: 0.64rem;
+  color: #e06c75;
+  line-height: 1.2;
+}
 
 /* Type accent colors (drive the --edge custom property). */
 .card[data-type='situation'] { --edge: #e06c75; }

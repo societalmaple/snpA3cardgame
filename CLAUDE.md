@@ -71,9 +71,11 @@ apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
   `PlayerView` each client receives: own hands in full, opponents reduced to public
   info + hand *counts*, decks reduced to counts.
 - `constants.ts` holds tunables (target level, `HAND_LIMIT`, starting hand, player bounds).
-- **Hand limit.** Max `HAND_LIMIT` cards across both hands. Drawing over it routes the
-  player into a `discard` phase (`DISCARD_CARD` action) that resumes the prior phase
-  once they're back at/under the limit — so they choose what to keep.
+- **Discard phase.** The `discard` phase carries a `discardTask`: `limit` (trim to
+  `HAND_LIMIT`, hand cards only) or `count` (pay a "discard N" consequence from hand
+  *or equipped* cards). `DISCARD_CARD` resolves it, then resumes the prior phase.
+  Situation consequences are applied via `applyConsequences` — non-discard effects
+  resolve immediately; discard effects become an interactive `count` task.
 - **Strengths are consumed** when a Situation is solved (RESOLVE_COMBAT win discards
   the winner's equipped Strengths; Friends/Clubs stay). `UNEQUIP_CARD` returns an
   equipped card to its hand (Strength/Friend → experience hand, Club → situation hand).

@@ -301,6 +301,43 @@ describe('strength consumption and unequip', () => {
   });
 });
 
+describe('failure discard consequences', () => {
+  it('lets the player choose what to discard — including an equipped card — after failing', () => {
+    const base = twoPlayers();
+    const sitId = base.situationDeck.find((id) => {
+      const c = cardOf(id);
+      return c?.type === 'situation' && c.consequences.length === 1 && c.consequences[0]!.type === 'DISCARD_EXPERIENCE';
+    })!;
+    const s: GameState = {
+      ...base,
+      phase: 'combat',
+      currentPlayerIndex: 0,
+      activeSituation: { cardId: sitId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      turnFlags: { enteredCombatThisTurn: true },
+      // one equipped Strength, empty hands, so the only way to pay the discard is the equipped card
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, strengths: ['str-01__700'], experienceHand: [], situationHand: [] } : p)),
+    };
+
+    const failed = applyAction(s, { type: 'RESOLVE_COMBAT', playerId: 'p1' });
+    expect(failed.ok).toBe(true);
+    if (!failed.ok) return;
+    expect(failed.state.winnerId).toBeNull();
+    expect(failed.state.phase).toBe('discard');
+    expect(failed.state.discardTask).toEqual({ kind: 'count', remaining: 1, pool: 'experience' });
+
+    const legal = getLegalActions(failed.state, 'p1');
+    expect(legal.mustDiscard).toBe(true);
+    expect(legal.discardable).toContain('str-01__700'); // equipped strength is a valid discard
+
+    const after = applyAction(failed.state, { type: 'DISCARD_CARD', playerId: 'p1', cardId: 'str-01__700' });
+    expect(after.ok).toBe(true);
+    if (!after.ok) return;
+    expect(after.state.phase).toBe('main');
+    expect(after.state.players.find((p) => p.id === 'p1')!.strengths).toEqual([]);
+    expect(after.state.experienceDiscard).toContain('str-01__700');
+  });
+});
+
 describe('hand limit', () => {
   it('drawing over the limit forces a discard, and you choose what to keep', () => {
     const base = twoPlayers();

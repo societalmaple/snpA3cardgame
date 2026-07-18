@@ -53,6 +53,16 @@ export interface PendingHelp {
   offeredExperience: number;
 }
 
+/**
+ * What the current player must do while in the `discard` phase.
+ * - `limit`: trim down until at/under the hand limit (hand cards only).
+ * - `count`: discard `remaining` cards to satisfy a consequence; `pool` says which
+ *   of the player's cards qualify (hand *and* equipped).
+ */
+export type DiscardTask =
+  | { kind: 'limit' }
+  | { kind: 'count'; remaining: number; pool: 'experience' | 'situation' | 'any' };
+
 export interface GameState {
   phase: Phase;
   players: PlayerState[]; // index order == turn order
@@ -68,8 +78,10 @@ export interface GameState {
 
   activeSituation: ActiveSituation | null;
   pendingHelp: PendingHelp | null;
-  /** Phase to return to once the current player has discarded down to the limit. */
+  /** Phase to return to once the current player has finished discarding. */
   resumeAfterDiscard: Phase | null;
+  /** Active obligation during the `discard` phase (null otherwise). */
+  discardTask: DiscardTask | null;
   winnerId: PlayerId | null;
 
   rngState: number;

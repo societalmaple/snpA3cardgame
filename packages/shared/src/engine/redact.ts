@@ -1,5 +1,5 @@
 import type { CardInstanceId } from '../cards/types.ts';
-import type { GameState, PlayerId, GameEvent, Phase, PendingHelp } from './state.ts';
+import type { GameState, PlayerId, GameEvent, Phase, PendingHelp, DiscardTask } from './state.ts';
 import { getLegalActions, type LegalActions } from './reduce.ts';
 import { combatMath, type CombatMath } from './bonuses.ts';
 
@@ -39,6 +39,7 @@ export interface PlayerView {
   yourExperienceHand: CardInstanceId[];
   activeSituation: ActiveSituationView | null;
   pendingHelp: PendingHelp | null;
+  discardTask: DiscardTask | null; // what the current player must discard, if anything
   availableCharacters: CardInstanceId[]; // pickable during character select
   situationDeckCount: number;
   experienceDeckCount: number;
@@ -82,6 +83,7 @@ export function redactFor(state: GameState, playerId: PlayerId): PlayerView {
     yourExperienceHand: you ? you.experienceHand : [],
     activeSituation,
     pendingHelp: state.pendingHelp,
+    discardTask: state.discardTask,
     availableCharacters: state.availableCharacters,
     situationDeckCount: state.situationDeck.length,
     experienceDeckCount: state.experienceDeck.length,

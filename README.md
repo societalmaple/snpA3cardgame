@@ -78,7 +78,9 @@ hand**:
 - **Situation** → you fight it. Your total is your equipped `Strength + Friend + Club`
   bonuses (**your Level does not count**). If your total is **greater than or equal
   to** the Situation's difficulty you win: gain levels and Experience cards.
-  Otherwise you suffer its consequences.
+  Otherwise you suffer its consequences (**listed on the card**). If a consequence
+  makes you discard cards, you choose which to lose — you may even discard equipped
+  cards.
 - **Mess-Up** → resolves immediately (something bad happens).
 - **Club / Go-Up-A-Level** → goes into your hand to play later.
 

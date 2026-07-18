@@ -1,7 +1,8 @@
 import type { CardInstanceId } from '../cards/types.ts';
 import { cardOf } from '../cards/index.ts';
 import { TARGET_LEVEL, HAND_LIMIT } from '../constants.ts';
-import type { GameState, PlayerId, PlayerState, Phase } from './state.ts';
+import type { Effect } from '../cards/types.ts';
+import type { GameState, PlayerId, PlayerState, Phase, DiscardTask } from './state.ts';
 import { currentPlayer, findPlayer } from './state.ts';
 import { combatMath } from './bonuses.ts';
 import { applyEffect, applyEffects } from './effects.ts';
@@ -59,6 +60,62 @@ function equippedCards(p: PlayerState): CardInstanceId[] {
 }
 
 /**
+ * Cards a player may discard to satisfy a forced-discard consequence — includes
+ * equipped cards, so a "discard experience" hit can be paid with an equipped Strength.
+ */
+function discardCandidates(p: PlayerState, pool: 'experience' | 'situation' | 'any'): CardInstanceId[] {
+  const experience = [...p.experienceHand, ...p.strengths, ...(p.friendId ? [p.friendId] : [])];
+  const situation = [...p.situationHand, ...(p.clubId ? [p.clubId] : [])];
+  if (pool === 'experience') return experience;
+  if (pool === 'situation') return situation;
+  return [...experience, ...situation];
+}
+
+/** Remove one owned card (hand or equipped) and send it to the matching discard pile. */
+function removeOwnedCardToDiscard(state: GameState, playerId: PlayerId, cardId: CardInstanceId): GameState {
+  const type = cardOf(cardId)?.type;
+  const toExperiencePile = type === 'strength' || type === 'friend';
+  let s = updatePlayer(state, playerId, (p) => {
+    if (p.experienceHand.includes(cardId)) return { ...p, experienceHand: removeFirst(p.experienceHand, cardId) };
+    if (p.situationHand.includes(cardId)) return { ...p, situationHand: removeFirst(p.situationHand, cardId) };
+    if (p.strengths.includes(cardId)) return { ...p, strengths: removeFirst(p.strengths, cardId) };
+    if (p.friendId === cardId) return { ...p, friendId: null };
+    if (p.clubId === cardId) return { ...p, clubId: null };
+    return p;
+  });
+  s = toExperiencePile
+    ? { ...s, experienceDiscard: [...s.experienceDiscard, cardId] }
+    : { ...s, situationDiscard: [...s.situationDiscard, cardId] };
+  return s;
+}
+
+/**
+ * Apply a card's consequences/effects. Non-discard effects resolve immediately;
+ * "discard N card(s)" effects become an interactive obligation so the player picks
+ * what to lose (from hand or equipped), routing through the `discard` phase.
+ */
+function applyConsequences(state: GameState, effects: readonly Effect[], playerId: PlayerId, resumePhase: Phase): GameState {
+  const isDiscard = (e: Effect) => e.type === 'DISCARD_EXPERIENCE' || e.type === 'DISCARD_SITUATION';
+  const immediate = effects.filter((e) => !isDiscard(e));
+  const discards = effects.filter(isDiscard);
+  let s = applyEffects(state, immediate, playerId);
+
+  if (discards.length > 0) {
+    const count = discards.reduce((n, e) => n + ('amount' in e ? e.amount : 0), 0);
+    const hasExp = discards.some((e) => e.type === 'DISCARD_EXPERIENCE');
+    const hasSit = discards.some((e) => e.type === 'DISCARD_SITUATION');
+    const pool = hasExp && hasSit ? 'any' : hasExp ? 'experience' : 'situation';
+    const player = findPlayer(s, playerId)!;
+    const need = Math.min(count, discardCandidates(player, pool).length);
+    if (need > 0) {
+      s = { ...s, phase: 'discard', discardTask: { kind: 'count', remaining: need, pool }, resumeAfterDiscard: resumePhase };
+      return pushLog(s, `${player.name} must discard ${need} card(s) — hand or equipped.`, playerId);
+    }
+  }
+  return { ...s, phase: resumePhase, resumeAfterDiscard: null, discardTask: null };
+}
+
+/**
  * After a draw, route to the discard phase if the (current) player is over the hand
  * limit, otherwise continue to `resumePhase`. The player picks what to discard, so
  * they can keep a freshly drawn card by ditching an older one.
@@ -67,12 +124,12 @@ function withHandLimit(state: GameState, playerId: PlayerId, resumePhase: Phase)
   const p = findPlayer(state, playerId);
   if (p && handSize(p) > HAND_LIMIT) {
     return pushLog(
-      { ...state, phase: 'discard', resumeAfterDiscard: resumePhase },
+      { ...state, phase: 'discard', discardTask: { kind: 'limit' }, resumeAfterDiscard: resumePhase },
       `${p.name} is over the hand limit (${handSize(p)}/${HAND_LIMIT}) — discard down to ${HAND_LIMIT}.`,
       playerId,
     );
   }
-  return { ...state, phase: resumePhase, resumeAfterDiscard: null };
+  return { ...state, phase: resumePhase, resumeAfterDiscard: null, discardTask: null };
 }
 
 /** Advance to the next connected player and reset per-turn state. */
@@ -90,6 +147,7 @@ function advanceTurn(state: GameState): GameState {
     activeSituation: null,
     pendingHelp: null,
     resumeAfterDiscard: null,
+    discardTask: null,
     turnFlags: { enteredCombatThisTurn: false },
   };
 }
@@ -143,8 +201,8 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
         }
         case 'messup': {
           s = pushLog(s, `${cur.name} drew a Mess-Up: ${card.name}.`, cur.id);
-          s = applyEffects(s, card.effects, cur.id);
-          return done({ ...s, situationDiscard: [...s.situationDiscard, drawnId], phase: 'main' });
+          s = { ...s, situationDiscard: [...s.situationDiscard, drawnId] };
+          return done(applyConsequences(s, card.effects, cur.id, 'main'));
         }
         case 'club':
         case 'levelup': {
@@ -350,31 +408,31 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
       }
 
       s = pushLog(s, `${cur.name} fails ${situation.name}. (${math.total} vs ${math.difficulty})`, cur.id);
-      s = applyEffects(s, situation.consequences, cur.id);
-      return done({ ...s, phase: 'main' });
+      return done(applyConsequences(s, situation.consequences, cur.id, 'main'));
     }
 
     case 'DISCARD_CARD': {
       if (!isCurrent) return fail('Not your turn.');
-      if (state.phase !== 'discard') return fail('You can only discard when over the hand limit.');
-      const inSit = cur.situationHand.includes(action.cardId);
-      const inExp = cur.experienceHand.includes(action.cardId);
-      if (!inSit && !inExp) return fail('That card is not in your hand.');
+      if (state.phase !== 'discard' || !state.discardTask) return fail('Nothing to discard right now.');
+      const task = state.discardTask;
+      const candidates =
+        task.kind === 'limit' ? [...cur.situationHand, ...cur.experienceHand] : discardCandidates(cur, task.pool);
+      if (!candidates.includes(action.cardId)) return fail('You cannot discard that card right now.');
 
-      let s = updatePlayer(state, cur.id, (p) =>
-        inSit
-          ? { ...p, situationHand: removeFirst(p.situationHand, action.cardId) }
-          : { ...p, experienceHand: removeFirst(p.experienceHand, action.cardId) },
-      );
-      s = inSit
-        ? { ...s, situationDiscard: [...s.situationDiscard, action.cardId] }
-        : { ...s, experienceDiscard: [...s.experienceDiscard, action.cardId] };
+      let s = removeOwnedCardToDiscard(state, cur.id, action.cardId);
       s = pushLog(s, `${cur.name} discards ${cardOf(action.cardId)?.name ?? 'a card'}.`, cur.id);
-
       const after = currentPlayer(s);
-      if (handSize(after) > HAND_LIMIT) return done(s); // still over the limit
+
+      if (task.kind === 'limit') {
+        if (handSize(after) > HAND_LIMIT) return done(s); // still over the limit
+      } else {
+        const remaining = task.remaining - 1;
+        if (remaining > 0 && discardCandidates(after, task.pool).length > 0) {
+          return done({ ...s, discardTask: { ...task, remaining } });
+        }
+      }
       const resume = s.resumeAfterDiscard ?? 'main';
-      return done({ ...s, phase: resume, resumeAfterDiscard: null });
+      return done({ ...s, phase: resume, resumeAfterDiscard: null, discardTask: null });
     }
 
     case 'END_TURN': {
@@ -489,10 +547,14 @@ export function getLegalActions(state: GameState, playerId: PlayerId): LegalActi
       legal.unequippable = handSize(player) < HAND_LIMIT ? equippedCards(player) : [];
       legal.canEndTurn = true;
       return legal;
-    case 'discard':
+    case 'discard': {
+      const task = state.discardTask;
+      if (!task) return legal;
       legal.mustDiscard = true;
-      legal.discardable = [...player.situationHand, ...player.experienceHand];
+      legal.discardable =
+        task.kind === 'limit' ? [...player.situationHand, ...player.experienceHand] : discardCandidates(player, task.pool);
       return legal;
+    }
     default:
       return legal;
   }

@@ -93,6 +93,7 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
     activeSituation: null,
     pendingHelp: null,
     resumeAfterDiscard: null,
+    discardTask: null,
     winnerId: null,
     rngState,
     log: [{ id: 0, turn: 1, message: 'Players are choosing characters.' }],

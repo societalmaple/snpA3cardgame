@@ -200,7 +200,12 @@ export function Game({ view }: { view: PlayerView }) {
 
         <div className={styles.equipped}>
           <span className={styles.zoneLabel}>
-            Equipped{legal.unequippable.length > 0 && <em className={styles.hintInline}> · click to unequip</em>}
+            Equipped
+            {legal.mustDiscard ? (
+              <em className={styles.hintInline}> · click to discard</em>
+            ) : (
+              legal.unequippable.length > 0 && <em className={styles.hintInline}> · click to unequip</em>
+            )}
           </span>
           <div className={styles.cardRow}>
             {equipped.map((id) => (
@@ -208,7 +213,13 @@ export function Game({ view }: { view: PlayerView }) {
                 key={id}
                 id={id}
                 size="sm"
-                onClick={legal.unequippable.includes(id) ? () => act({ type: 'UNEQUIP_CARD', playerId: me, cardId: id }) : undefined}
+                onClick={
+                  legal.mustDiscard && legal.discardable.includes(id)
+                    ? () => act({ type: 'DISCARD_CARD', playerId: me, cardId: id })
+                    : legal.unequippable.includes(id)
+                      ? () => act({ type: 'UNEQUIP_CARD', playerId: me, cardId: id })
+                      : undefined
+                }
               />
             ))}
             {!equipped.length && <span className={styles.empty}>nothing equipped</span>}
@@ -243,6 +254,9 @@ export function Game({ view }: { view: PlayerView }) {
 function getPrompt(view: PlayerView): string {
   if (view.winnerId) return 'Game over.';
   if (view.legal.mustDiscard) {
+    if (view.discardTask?.kind === 'count') {
+      return `You failed — discard ${view.discardTask.remaining} card(s). You may discard from your hand or your equipped cards.`;
+    }
     return `Your hand is over ${HAND_LIMIT} — discard a card (toss the new one, or an old one to keep it).`;
   }
   const isMyTurn = view.currentPlayerId === view.you;
