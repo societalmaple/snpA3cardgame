@@ -12,7 +12,7 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "concurrently -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
+    "dev": "node scripts/dev.mjs",
     "dev:server": "npm run dev -w @school-days/server",
     "dev:web": "npm run dev -w @school-days/web",
     "build": "npm run build --workspaces --if-present",
@@ -24,7 +24,6 @@
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/node": "^22.10.0",
-    "concurrently": "^9.1.0",
     "eslint": "^9.17.0",
     "globals": "^15.14.0",
     "tsx": "^4.19.0",

@@ -19,7 +19,7 @@ npm test               # run all Vitest suites (engine tests live in packages/sh
 npm run test:watch     # watch mode
 npm run typecheck      # tsc --noEmit across every workspace
 npm run lint           # eslint (flat config)
-npm run dev            # run server + web together (concurrently)
+npm run dev            # run server + web together (scripts/dev.mjs, no extra deps)
 npm run dev:server     # server only (Socket.IO, defaults to :3001, PORT env to override)
 npm run dev:web        # web only (Vite dev server on :5173)
 npm run build          # build all buildable workspaces (web)
