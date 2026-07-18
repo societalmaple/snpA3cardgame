@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Action, CardInstanceId, PlayerView } from '@school-days/shared';
+import { HAND_LIMIT, type Action, type CardInstanceId, type PlayerView } from '@school-days/shared';
 import { useStore } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
 import { cardName } from '../cardDisplay.ts';
@@ -19,9 +19,13 @@ export function Game({ view }: { view: PlayerView }) {
   const opponents = view.players.filter((p) => p.id !== me);
   const self = view.players.find((p) => p.id === me);
 
-  const clickable = (id: CardInstanceId) => legal.playableSituations.includes(id) || legal.playableCards.includes(id);
+  const clickable = (id: CardInstanceId) =>
+    legal.playableSituations.includes(id) ||
+    legal.playableCards.includes(id) ||
+    (legal.mustDiscard && legal.discardable.includes(id));
   const onCardClick = (id: CardInstanceId) => {
-    if (legal.playableSituations.includes(id)) act({ type: 'PLAY_SITUATION_FROM_HAND', playerId: me, cardId: id });
+    if (legal.mustDiscard && legal.discardable.includes(id)) act({ type: 'DISCARD_CARD', playerId: me, cardId: id });
+    else if (legal.playableSituations.includes(id)) act({ type: 'PLAY_SITUATION_FROM_HAND', playerId: me, cardId: id });
     else if (legal.playableCards.includes(id)) act({ type: 'PLAY_CARD', playerId: me, cardId: id });
   };
 
@@ -178,6 +182,9 @@ export function Game({ view }: { view: PlayerView }) {
           <span className={styles.oName}>{self?.name} (you)</span>
           <span className={styles.level}>Lv {self?.level}</span>
           {self && <span className={styles.charChip}>{cardName(self.characterId)}</span>}
+          <span className={styles.level}>
+            Hand {view.yourSituationHand.length + view.yourExperienceHand.length}/{HAND_LIMIT}
+          </span>
         </div>
 
         <div className={styles.equipped}>
@@ -217,6 +224,9 @@ export function Game({ view }: { view: PlayerView }) {
 
 function getPrompt(view: PlayerView): string {
   if (view.winnerId) return 'Game over.';
+  if (view.legal.mustDiscard) {
+    return `Your hand is over ${HAND_LIMIT} — discard a card (toss the new one, or an old one to keep it).`;
+  }
   const isMyTurn = view.currentPlayerId === view.you;
   if (view.phase === 'await_help') {
     return view.legal.canRespondToHelp ? "You've been asked to help — accept or decline." : 'Waiting for the helper to respond…';

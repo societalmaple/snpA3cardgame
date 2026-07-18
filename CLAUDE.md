@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 An online, multiplayer web card game ("School Days", working title) for 2–4 players.
-Players race to Well-Being **Level 5**; the winning level must come from *solving a
+Players race to Well-Being **Level 15**; the winning level must come from *solving a
 Situation*. Full game design is in [`directions.md`](./directions.md); the build
 plan and decisions are in [`PLAN.md`](./PLAN.md).
 
@@ -65,7 +65,10 @@ apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
 - **Redaction.** `engine/redact.ts` `redactFor(state, playerId)` produces the
   `PlayerView` each client receives: own hands in full, opponents reduced to public
   info + hand *counts*, decks reduced to counts.
-- `constants.ts` holds tunables (target level, starting hand, player bounds).
+- `constants.ts` holds tunables (target level, `HAND_LIMIT`, starting hand, player bounds).
+- **Hand limit.** Max `HAND_LIMIT` cards across both hands. Drawing over it routes the
+  player into a `discard` phase (`DISCARD_CARD` action) that resumes the prior phase
+  once they're back at/under the limit — so they choose what to keep.
 - `protocol.ts` is the typed Socket.IO contract shared by both ends.
 
 ### `apps/server`

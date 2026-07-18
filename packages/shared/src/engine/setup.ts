@@ -92,6 +92,7 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
     experienceDiscard: [],
     activeSituation: null,
     pendingHelp: null,
+    resumeAfterDiscard: null,
     winnerId: null,
     rngState,
     log: [{ id: 0, turn: 1, message: 'Game started.' }],

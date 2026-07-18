@@ -7,6 +7,7 @@ import {
   cardOf,
   applyEffect,
   TARGET_LEVEL,
+  HAND_LIMIT,
   type Action,
   type GameState,
 } from '../index.ts';
@@ -74,7 +75,7 @@ describe('validation', () => {
 
 describe('effects', () => {
   it('caps GAIN_LEVEL below TARGET_LEVEL (Go-Up-A-Level can never win)', () => {
-    const s = applyEffect(twoPlayers(), { type: 'GAIN_LEVEL', amount: 10 }, 'p1');
+    const s = applyEffect(twoPlayers(), { type: 'GAIN_LEVEL', amount: 99 }, 'p1');
     expect(s.players.find((p) => p.id === 'p1')!.level).toBe(TARGET_LEVEL - 1);
   });
   it('floors LOSE_LEVEL at 1', () => {
@@ -84,7 +85,8 @@ describe('effects', () => {
 });
 
 describe('combat and victory', () => {
-  it('wins the game by solving a Situation to reach TARGET_LEVEL', () => {
+  it('wins the game by solving a Situation to reach TARGET_LEVEL (15)', () => {
+    expect(TARGET_LEVEL).toBe(15);
     const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 777);
     const sitId = base.situationDeck.find((id) => {
       const c = cardOf(id);
@@ -96,7 +98,7 @@ describe('combat and victory', () => {
       currentPlayerIndex: 0,
       activeSituation: { cardId: sitId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
       turnFlags: { enteredCombatThisTurn: true },
-      players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: 4 } : p)),
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: TARGET_LEVEL - 1 } : p)),
     };
     const res = applyAction(s, { type: 'RESOLVE_COMBAT', playerId: 'p1' });
     expect(res.ok).toBe(true);
@@ -129,6 +131,42 @@ describe('combat and victory', () => {
   });
 });
 
+describe('hand limit', () => {
+  it('drawing over the limit forces a discard, and you choose what to keep', () => {
+    const base = twoPlayers();
+    const fullHand = Array.from({ length: HAND_LIMIT }, (_, i) => `str-01__${900 + i}`);
+    const clubOnTop = 'club-01__999';
+    const s: GameState = {
+      ...base,
+      currentPlayerIndex: 0,
+      phase: 'await_action',
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, experienceHand: fullHand, situationHand: [] } : p)),
+      situationDeck: [...base.situationDeck, clubOnTop], // drawn next (top = end)
+    };
+    const drawn = applyAction(s, { type: 'DRAW_SITUATION', playerId: 'p1' });
+    expect(drawn.ok).toBe(true);
+    if (!drawn.ok) return;
+    expect(drawn.state.phase).toBe('discard');
+
+    const legal = getLegalActions(drawn.state, 'p1');
+    expect(legal.mustDiscard).toBe(true);
+    expect(legal.discardable).toHaveLength(HAND_LIMIT + 1);
+    // cannot end turn while over the limit
+    expect(applyAction(drawn.state, { type: 'END_TURN', playerId: 'p1' }).ok).toBe(false);
+
+    const discarded = applyAction(drawn.state, { type: 'DISCARD_CARD', playerId: 'p1', cardId: legal.discardable[0]! });
+    expect(discarded.ok).toBe(true);
+    if (!discarded.ok) return;
+    expect(discarded.state.phase).toBe('main');
+    const p1 = discarded.state.players.find((p) => p.id === 'p1')!;
+    expect(p1.situationHand.length + p1.experienceHand.length).toBe(HAND_LIMIT);
+  });
+
+  it('rejects DISCARD_CARD when not over the limit', () => {
+    expect(applyAction(twoPlayers(), { type: 'DISCARD_CARD', playerId: 'p1', cardId: 'x' }).ok).toBe(false);
+  });
+});
+
 describe('full auto-played game', () => {
   it('conserves every card, rotates turns, and produces a winner', () => {
     let s = createGame(
@@ -153,7 +191,8 @@ describe('full auto-played game', () => {
       seenCurrent.add(curId);
       const legal = getLegalActions(s, curId);
       let action: Action;
-      if (legal.canDraw) action = { type: 'DRAW_SITUATION', playerId: curId };
+      if (legal.mustDiscard) action = { type: 'DISCARD_CARD', playerId: curId, cardId: legal.discardable[0]! };
+      else if (legal.canDraw) action = { type: 'DRAW_SITUATION', playerId: curId };
       else if (s.phase === 'combat') {
         action = legal.playableCards.length
           ? { type: 'PLAY_CARD', playerId: curId, cardId: legal.playableCards[0]! }

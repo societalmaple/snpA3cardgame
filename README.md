@@ -1,7 +1,7 @@
 # School Days (working title)
 
 An online, real-time **multiplayer web card game for 2–4 players**. Race to
-Well-Being **Level 5** — but the winning level must come from *solving a Situation*,
+Well-Being **Level 15** — but the winning level must come from *solving a Situation*,
 not from a lucky card. The server is authoritative, so nobody can cheat, and each
 player only ever sees their own hand.
 
@@ -82,8 +82,12 @@ boost your total, or **ask another player for help** (their bonuses join yours; 
 keep all the levels, they get the Experience you offered). If you don't fight at all
 this turn, you draw one Experience card instead ("gain problem-solving ability").
 
-**First to Level 5 wins — but only if that final level came from solving a
-Situation.** Go-Up-A-Level cards can carry you to Level 4 but never win the game.
+**First to Level 15 wins — but only if that final level came from solving a
+Situation.** Go-Up-A-Level cards can carry you to Level 14 but never win the game.
+
+You can hold at most **6 cards** across your hands. If a card you draw or earn puts
+you over the limit, you must discard down to 6 — you choose what to keep, so you can
+toss the new card or an older one.
 
 ## Features
 
@@ -93,6 +97,7 @@ Situation.** Go-Up-A-Level cards can carry you to Level 4 but never win the game
 - Anonymous 4-letter room codes; lobby → ready → start.
 - Reconnect after a refresh/drop via a saved session token (while the server is up).
 - Illegal moves are rejected server-side; the UI only offers legal actions.
+- 6-card hand limit with a choose-what-to-keep discard step when you go over.
 - Data-driven cards — no per-card code.
 
 ## Project layout

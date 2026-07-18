@@ -10,6 +10,7 @@ export type Phase =
   | 'await_action' // current player must draw or play a Situation from hand
   | 'combat' // a Situation is active; play cards / ask help / resolve
   | 'await_help' // waiting for the chosen helper to accept/decline
+  | 'discard' // current player is over the hand limit and must discard down
   | 'main' // post-draw/post-combat: play cards, then end turn
   | 'game_over';
 
@@ -63,6 +64,8 @@ export interface GameState {
 
   activeSituation: ActiveSituation | null;
   pendingHelp: PendingHelp | null;
+  /** Phase to return to once the current player has discarded down to the limit. */
+  resumeAfterDiscard: Phase | null;
   winnerId: PlayerId | null;
 
   rngState: number;

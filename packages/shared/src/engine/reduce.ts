@@ -1,7 +1,7 @@
 import type { CardInstanceId } from '../cards/types.ts';
 import { cardOf } from '../cards/index.ts';
-import { TARGET_LEVEL } from '../constants.ts';
-import type { GameState, PlayerId } from './state.ts';
+import { TARGET_LEVEL, HAND_LIMIT } from '../constants.ts';
+import type { GameState, PlayerId, PlayerState, Phase } from './state.ts';
 import { currentPlayer, findPlayer } from './state.ts';
 import { combatMath } from './bonuses.ts';
 import { applyEffect, applyEffects } from './effects.ts';
@@ -21,6 +21,7 @@ export type Action =
   | { type: 'ASK_FOR_HELP'; playerId: PlayerId; helperId: PlayerId; offeredExperience: number }
   | { type: 'RESPOND_TO_HELP'; playerId: PlayerId; accept: boolean }
   | { type: 'RESOLVE_COMBAT'; playerId: PlayerId }
+  | { type: 'DISCARD_CARD'; playerId: PlayerId; cardId: CardInstanceId }
   | { type: 'END_TURN'; playerId: PlayerId };
 
 export type ActionType = Action['type'];
@@ -45,6 +46,28 @@ function drawExperienceTo(state: GameState, playerId: PlayerId, n: number): Game
   return s;
 }
 
+/** Total cards a player holds across both hands. */
+function handSize(p: PlayerState): number {
+  return p.situationHand.length + p.experienceHand.length;
+}
+
+/**
+ * After a draw, route to the discard phase if the (current) player is over the hand
+ * limit, otherwise continue to `resumePhase`. The player picks what to discard, so
+ * they can keep a freshly drawn card by ditching an older one.
+ */
+function withHandLimit(state: GameState, playerId: PlayerId, resumePhase: Phase): GameState {
+  const p = findPlayer(state, playerId);
+  if (p && handSize(p) > HAND_LIMIT) {
+    return pushLog(
+      { ...state, phase: 'discard', resumeAfterDiscard: resumePhase },
+      `${p.name} is over the hand limit (${handSize(p)}/${HAND_LIMIT}) — discard down to ${HAND_LIMIT}.`,
+      playerId,
+    );
+  }
+  return { ...state, phase: resumePhase, resumeAfterDiscard: null };
+}
+
 /** Advance to the next connected player and reset per-turn state. */
 function advanceTurn(state: GameState): GameState {
   const n = state.players.length;
@@ -59,6 +82,7 @@ function advanceTurn(state: GameState): GameState {
     phase: 'await_action',
     activeSituation: null,
     pendingHelp: null,
+    resumeAfterDiscard: null,
     turnFlags: { enteredCombatThisTurn: false },
   };
 }
@@ -100,7 +124,7 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
         case 'levelup': {
           s = updatePlayer(s, cur.id, (p) => ({ ...p, situationHand: [...p.situationHand, drawnId] }));
           s = pushLog(s, `${cur.name} drew ${card.name} into their hand.`, cur.id);
-          return done({ ...s, phase: 'main' });
+          return done(withHandLimit(s, cur.id, 'main'));
         }
         default: {
           // Strengths/Friends/Characters never belong in the Situation deck; discard defensively.
@@ -239,10 +263,19 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
         const totalExp = situation.reward.experience;
         const toHelper = active.helperId ? Math.min(active.helperOfferedExperience, totalExp) : 0;
         const toSelf = totalExp - toHelper;
+        // The current player may draw over the limit here — the discard phase below
+        // makes them trim down. The helper can't discard on someone else's turn, so
+        // their reward is capped to whatever hand room they have.
         s = drawExperienceTo(s, cur.id, toSelf);
-        if (active.helperId && toHelper > 0) s = drawExperienceTo(s, active.helperId, toHelper);
+        let helperGot = 0;
+        if (active.helperId && toHelper > 0) {
+          const helper = findPlayer(s, active.helperId);
+          const room = helper ? Math.max(0, HAND_LIMIT - handSize(helper)) : 0;
+          helperGot = Math.min(toHelper, room);
+          if (helperGot > 0) s = drawExperienceTo(s, active.helperId, helperGot);
+        }
         if (totalExp > 0) {
-          const helperNote = active.helperId ? `, ${toHelper} to helper` : '';
+          const helperNote = active.helperId ? `, ${helperGot} to helper` : '';
           s = pushLog(s, `Experience: ${toSelf} to ${cur.name}${helperNote}.`, cur.id);
         }
 
@@ -250,7 +283,7 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
           s = { ...s, winnerId: cur.id, phase: 'game_over' };
           return done(pushLog(s, `🎉 ${cur.name} reaches Level ${TARGET_LEVEL} and wins!`, cur.id));
         }
-        return done({ ...s, phase: 'main' });
+        return done(withHandLimit(s, cur.id, 'main'));
       }
 
       s = pushLog(s, `${cur.name} fails ${situation.name}. (${math.total} vs ${math.difficulty})`, cur.id);
@@ -258,11 +291,36 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
       return done({ ...s, phase: 'main' });
     }
 
+    case 'DISCARD_CARD': {
+      if (!isCurrent) return fail('Not your turn.');
+      if (state.phase !== 'discard') return fail('You can only discard when over the hand limit.');
+      const inSit = cur.situationHand.includes(action.cardId);
+      const inExp = cur.experienceHand.includes(action.cardId);
+      if (!inSit && !inExp) return fail('That card is not in your hand.');
+
+      let s = updatePlayer(state, cur.id, (p) =>
+        inSit
+          ? { ...p, situationHand: removeFirst(p.situationHand, action.cardId) }
+          : { ...p, experienceHand: removeFirst(p.experienceHand, action.cardId) },
+      );
+      s = inSit
+        ? { ...s, situationDiscard: [...s.situationDiscard, action.cardId] }
+        : { ...s, experienceDiscard: [...s.experienceDiscard, action.cardId] };
+      s = pushLog(s, `${cur.name} discards ${cardOf(action.cardId)?.name ?? 'a card'}.`, cur.id);
+
+      const after = currentPlayer(s);
+      if (handSize(after) > HAND_LIMIT) return done(s); // still over the limit
+      const resume = s.resumeAfterDiscard ?? 'main';
+      return done({ ...s, phase: resume, resumeAfterDiscard: null });
+    }
+
     case 'END_TURN': {
       if (!isCurrent) return fail('Not your turn.');
       if (state.phase !== 'main') return fail('You can only end your turn after acting.');
       let s = state;
-      if (!s.turnFlags.enteredCombatThisTurn) {
+      // "Gain problem-solving ability" — draw one Experience card, but only if there
+      // is room (an automatic draw shouldn't force a discard as the turn ends).
+      if (!s.turnFlags.enteredCombatThisTurn && handSize(cur) < HAND_LIMIT) {
         const before = s;
         s = drawExperienceTo(s, cur.id, 1);
         if (s !== before) s = pushLog(s, `${cur.name} gains problem-solving ability (draws 1 Experience).`, cur.id);
@@ -291,6 +349,8 @@ export interface LegalActions {
   canRespondToHelp: boolean;
   canResolveCombat: boolean;
   canEndTurn: boolean;
+  mustDiscard: boolean;
+  discardable: CardInstanceId[]; // cards you may discard while over the hand limit
 }
 
 function emptyLegal(): LegalActions {
@@ -303,6 +363,8 @@ function emptyLegal(): LegalActions {
     canRespondToHelp: false,
     canResolveCombat: false,
     canEndTurn: false,
+    mustDiscard: false,
+    discardable: [],
   };
 }
 
@@ -351,6 +413,10 @@ export function getLegalActions(state: GameState, playerId: PlayerId): LegalActi
     case 'main':
       legal.playableCards = playableFromHand(player);
       legal.canEndTurn = true;
+      return legal;
+    case 'discard':
+      legal.mustDiscard = true;
+      legal.discardable = [...player.situationHand, ...player.experienceHand];
       return legal;
     default:
       return legal;
