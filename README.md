@@ -14,19 +14,57 @@ player only ever sees their own hand.
 - Commands + architecture for contributors: [`CLAUDE.md`](./CLAUDE.md)
 - Editing / adding cards: [`docs/adding-cards.md`](./docs/adding-cards.md)
 
-## Quick start
+## Running the game
 
-Requires **Node 20+** and access to the public npm registry.
+Requires **Node 20+** and access to the public npm registry. Run all commands from
+the repo root.
+
+1. **Install dependencies** (first time only):
+
+   ```bash
+   npm install
+   ```
+
+2. **Start the server and web client together:**
+
+   ```bash
+   npm run dev
+   ```
+
+   This runs the Socket.IO server on **:3001** and the Vite web client on **:5173**.
+   (To run them separately, use `npm run dev:server` and `npm run dev:web` in two
+   terminals.)
+
+3. **Open the game:** go to <http://localhost:5173>, enter a name, and
+   **Create a room**.
+
+4. **Add players:** share the 4-letter room code — others **Join** with it. To test
+   by yourself, open a second browser tab/window and join with the same code.
+
+5. **Play:** everyone clicks **Ready**, then the host clicks **Start**.
+
+> The client talks to `http://localhost:3001` by default. To point it elsewhere, set
+> `VITE_SERVER_URL`. To change the server port, set `PORT` (e.g. `PORT=4000 npm run dev:server`).
+
+## Testing
 
 ```bash
-npm install     # install workspace dependencies
-npm test        # verify the game engine (Vitest)
-npm run dev     # start the server (:3001) and the web client (:5173)
+npm test              # run all Vitest suites once
+npm run test:watch    # re-run tests on change
+npm run typecheck     # type-check every workspace (tsc --noEmit)
+npm run lint          # eslint (flat config)
 ```
 
-Open <http://localhost:5173>, enter a name, and **Create a room**. Share the
-4-letter code; friends **Join** with it (or open a second browser tab to test
-solo). Everyone clicks **Ready**, the host clicks **Start**, and play begins.
+Run a single test file (optionally filter by name with `-t`):
+
+```bash
+npx vitest run packages/shared/src/engine/engine.test.ts
+npx vitest run packages/shared/src/engine/engine.test.ts -t "victory"
+```
+
+The engine tests live in `packages/shared/src/engine/` and cover setup, redaction,
+move validation, combat/victory, the ask-for-help flow, and a full auto-played game
+that checks every card is conserved and a winner emerges.
 
 ## How to play
 
@@ -71,20 +109,11 @@ Stack: **TypeScript** end-to-end (npm workspaces monorepo) · React + Vite · Zu
 ## Development
 
 ```bash
-npm run dev:server   # server only (Socket.IO, :3001; set PORT to override)
-npm run dev:web      # web only (Vite, :5173; reads VITE_SERVER_URL, default :3001)
-npm run typecheck    # tsc --noEmit across every workspace
-npm run lint         # eslint (flat config)
 npm run build        # build buildable workspaces (web)
 ```
 
-Run a single test file:
-
-```bash
-npx vitest run packages/shared/src/engine/engine.test.ts
-```
-
-To add or rebalance cards, edit the data files only — see
+See [`CLAUDE.md`](./CLAUDE.md) for the full command list and architecture. To add or
+rebalance cards, edit the data files only — see
 [`docs/adding-cards.md`](./docs/adding-cards.md).
 
 ## Status
