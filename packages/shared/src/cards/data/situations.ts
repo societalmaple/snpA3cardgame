@@ -6,6 +6,9 @@ import type { SituationCard } from '../types.ts';
 // TO EDIT: change `name`, `art`, `difficulty`, `reward`, `consequences`, `enhancer`.
 // `reward.level` is the ONLY level source that can win the game. Consequences are
 // data-driven Effect[] (see ../types.ts). Add/remove entries freely.
+//
+// Keep `difficulty` within 2–10 (enforced by cards.test.ts). A player's total is
+// Level + equipped bonuses, so difficulties above ~10 become unsolvable early game.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const SITUATIONS: SituationCard[] = [
@@ -22,11 +25,11 @@ export const SITUATIONS: SituationCard[] = [
   { id: 'sit-11', type: 'situation', name: 'Situation 11', art: 'SITUATION 11', difficulty: 9, reward: { level: 1, experience: 2 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }] },
   { id: 'sit-12', type: 'situation', name: 'Situation 12', art: 'SITUATION 12', difficulty: 10, reward: { level: 2, experience: 2 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }] },
   { id: 'sit-13', type: 'situation', name: 'Situation 13', art: 'SITUATION 13', difficulty: 10, reward: { level: 1, experience: 2 }, consequences: [{ type: 'LOSE_CLUB' }] },
-  { id: 'sit-14', type: 'situation', name: 'Situation 14', art: 'SITUATION 14', difficulty: 11, reward: { level: 2, experience: 3 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }, { type: 'LOSE_STRENGTH', amount: 1 }] },
-  { id: 'sit-15', type: 'situation', name: 'Situation 15', art: 'SITUATION 15', difficulty: 12, reward: { level: 1, experience: 2 }, consequences: [{ type: 'DISCARD_EXPERIENCE', amount: 2 }] },
-  { id: 'sit-16', type: 'situation', name: 'Situation 16', art: 'SITUATION 16', difficulty: 12, reward: { level: 2, experience: 3 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }] },
-  { id: 'sit-17', type: 'situation', name: 'Situation 17', art: 'SITUATION 17', difficulty: 13, reward: { level: 2, experience: 3 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }, { type: 'DISCARD_EXPERIENCE', amount: 1 }] },
-  { id: 'sit-18', type: 'situation', name: 'Situation 18', art: 'SITUATION 18', difficulty: 14, reward: { level: 2, experience: 3 }, consequences: [{ type: 'LOSE_LEVEL', amount: 2 }] },
+  { id: 'sit-14', type: 'situation', name: 'Situation 14', art: 'SITUATION 14', difficulty: 9, reward: { level: 2, experience: 3 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }, { type: 'LOSE_STRENGTH', amount: 1 }] },
+  { id: 'sit-15', type: 'situation', name: 'Situation 15', art: 'SITUATION 15', difficulty: 10, reward: { level: 1, experience: 2 }, consequences: [{ type: 'DISCARD_EXPERIENCE', amount: 2 }] },
+  { id: 'sit-16', type: 'situation', name: 'Situation 16', art: 'SITUATION 16', difficulty: 10, reward: { level: 2, experience: 3 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }] },
+  { id: 'sit-17', type: 'situation', name: 'Situation 17', art: 'SITUATION 17', difficulty: 9, reward: { level: 2, experience: 3 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }, { type: 'DISCARD_EXPERIENCE', amount: 1 }] },
+  { id: 'sit-18', type: 'situation', name: 'Situation 18', art: 'SITUATION 18', difficulty: 10, reward: { level: 2, experience: 3 }, consequences: [{ type: 'LOSE_LEVEL', amount: 2 }] },
   { id: 'sit-19', type: 'situation', name: 'Situation 19', art: 'SITUATION 19', difficulty: 4, reward: { level: 1, experience: 1 }, consequences: [{ type: 'LOSE_LEVEL', amount: 1 }] },
   { id: 'sit-20', type: 'situation', name: 'Situation 20', art: 'SITUATION 20', difficulty: 5, reward: { level: 1, experience: 1 }, consequences: [{ type: 'DISCARD_SITUATION', amount: 1 }] },
 ];
