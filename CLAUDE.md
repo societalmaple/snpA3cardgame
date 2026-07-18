@@ -60,6 +60,11 @@ apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
   no per-card code. Card data is in `cards/data/*.ts`; see [`docs/adding-cards.md`](./docs/adding-cards.md).
 - **Card instances.** Decks hold multiple copies of a definition, so state tracks
   *instance* ids (`str-01__12`); use `cardOf(id)` / `defIdOf(id)` from `cards/index.ts`.
+- **Flow.** A game opens in the `character_select` phase — players simultaneously
+  `CHOOSE_CHARACTER` (each Character is unique) before the first turn; `characterId` is
+  null until chosen. Then normal turns (`await_action` → `combat` → `main`).
+- **Combat.** Total = equipped Strength + Friend + Club bonuses only (**Level does not
+  count**); you win when `total >= difficulty` (see `engine/bonuses.ts`).
 - **One source of truth for legality.** `getLegalActions(state, playerId)` drives both
   server validation and client button-enabling.
 - **Redaction.** `engine/redact.ts` `redactFor(state, playerId)` produces the

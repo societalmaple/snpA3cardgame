@@ -15,10 +15,12 @@ import {
 function gatherIds(state: GameState): string[] {
   const ids: string[] = [];
   for (const p of state.players) {
-    ids.push(p.characterId, ...p.situationHand, ...p.experienceHand, ...p.strengths);
+    if (p.characterId) ids.push(p.characterId);
+    ids.push(...p.situationHand, ...p.experienceHand, ...p.strengths);
     if (p.friendId) ids.push(p.friendId);
     if (p.clubId) ids.push(p.clubId);
   }
+  ids.push(...state.availableCharacters);
   ids.push(...state.situationDeck, ...state.situationDiscard, ...state.experienceDeck, ...state.experienceDiscard);
   if (state.activeSituation) ids.push(state.activeSituation.cardId);
   return ids;
@@ -26,16 +28,31 @@ function gatherIds(state: GameState): string[] {
 const sig = (state: GameState) => gatherIds(state).slice().sort().join('|');
 const twoPlayers = () => createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 12345);
 
+/** Create a game and run every player through character select, returning play state. */
+function startedGame(seed = 12345): GameState {
+  let s = twoPlayers();
+  if (seed !== 12345) s = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], seed);
+  while (s.phase === 'character_select') {
+    const chooser = s.players.find((p) => p.characterId === null)!;
+    const pick = getLegalActions(s, chooser.id).chooseableCharacters[0]!;
+    const r = applyAction(s, { type: 'CHOOSE_CHARACTER', playerId: chooser.id, characterId: pick });
+    if (!r.ok) throw new Error(r.error);
+    s = r.state;
+  }
+  return s;
+}
+
 describe('setup', () => {
-  it('deals 4 experience cards + a character to each player', () => {
+  it('starts in character select: experience dealt, no characters assigned yet', () => {
     const g = twoPlayers();
     expect(g.players).toHaveLength(2);
+    expect(g.phase).toBe('character_select');
+    expect(g.availableCharacters).toHaveLength(4);
     for (const p of g.players) {
       expect(p.experienceHand).toHaveLength(4);
       expect(p.level).toBe(1);
-      expect(cardOf(p.characterId)?.type).toBe('character');
+      expect(p.characterId).toBeNull();
     }
-    expect(g.phase).toBe('await_action');
   });
 
   it('rejects player counts outside 2-4', () => {
@@ -64,12 +81,42 @@ describe('redaction', () => {
   });
 });
 
+describe('character selection', () => {
+  it('lets each player pick a unique character, then begins the game', () => {
+    let s = twoPlayers();
+    expect(getLegalActions(s, 'p1').chooseableCharacters).toHaveLength(4);
+
+    const c1 = getLegalActions(s, 'p1').chooseableCharacters[0]!;
+    const r1 = applyAction(s, { type: 'CHOOSE_CHARACTER', playerId: 'p1', characterId: c1 });
+    expect(r1.ok).toBe(true);
+    if (!r1.ok) return;
+    s = r1.state;
+    expect(s.phase).toBe('character_select'); // still waiting for p2
+
+    // p1 can't choose again; p2 can't take p1's character
+    expect(applyAction(s, { type: 'CHOOSE_CHARACTER', playerId: 'p1', characterId: getLegalActions(s, 'p2').chooseableCharacters[0]! }).ok).toBe(false);
+    expect(applyAction(s, { type: 'CHOOSE_CHARACTER', playerId: 'p2', characterId: c1 }).ok).toBe(false);
+    // can't draw before selection completes
+    expect(applyAction(s, { type: 'DRAW_SITUATION', playerId: 'p1' }).ok).toBe(false);
+
+    const c2 = getLegalActions(s, 'p2').chooseableCharacters[0]!;
+    const r2 = applyAction(s, { type: 'CHOOSE_CHARACTER', playerId: 'p2', characterId: c2 });
+    expect(r2.ok).toBe(true);
+    if (!r2.ok) return;
+    s = r2.state;
+    expect(s.phase).toBe('await_action');
+    expect(s.players.find((p) => p.id === 'p1')!.characterId).toBe(c1);
+    expect(s.players.find((p) => p.id === 'p2')!.characterId).toBe(c2);
+    expect(getLegalActions(s, 'p1').canDraw).toBe(true);
+  });
+});
+
 describe('validation', () => {
   it('rejects a non-current player drawing', () => {
-    expect(applyAction(twoPlayers(), { type: 'DRAW_SITUATION', playerId: 'p2' }).ok).toBe(false);
+    expect(applyAction(startedGame(), { type: 'DRAW_SITUATION', playerId: 'p2' }).ok).toBe(false);
   });
   it('rejects ending a turn before acting', () => {
-    expect(applyAction(twoPlayers(), { type: 'END_TURN', playerId: 'p1' }).ok).toBe(false);
+    expect(applyAction(startedGame(), { type: 'END_TURN', playerId: 'p1' }).ok).toBe(false);
   });
 });
 
@@ -98,7 +145,8 @@ describe('combat and victory', () => {
       currentPlayerIndex: 0,
       activeSituation: { cardId: sitId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
       turnFlags: { enteredCombatThisTurn: true },
-      players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: TARGET_LEVEL - 1 } : p)),
+      // Level no longer adds to the total, so equip a Strength big enough to win.
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: TARGET_LEVEL - 1, strengths: ['str-08__700'] } : p)),
     };
     const res = applyAction(s, { type: 'RESOLVE_COMBAT', playerId: 'p1' });
     expect(res.ok).toBe(true);
@@ -106,6 +154,34 @@ describe('combat and victory', () => {
     expect(res.state.winnerId).toBe('p1');
     expect(res.state.phase).toBe('game_over');
     expect(applyAction(res.state, { type: 'END_TURN', playerId: 'p1' }).ok).toBe(false);
+  });
+
+  it('counts equipped bonuses only (not level) and wins on total >= difficulty', () => {
+    const base = twoPlayers();
+    const sit2 = base.situationDeck.find((id) => {
+      const c = cardOf(id);
+      return c?.type === 'situation' && c.difficulty === 2;
+    })!; // sit-01 (difficulty 2, +1 level)
+    const combat = (extra: Partial<{ strengths: string[] }>): GameState => ({
+      ...base,
+      phase: 'combat',
+      currentPlayerIndex: 0,
+      activeSituation: { cardId: sit2, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      turnFlags: { enteredCombatThisTurn: true },
+      players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: 14, strengths: [], friendId: null, clubId: null, ...extra } : p)),
+    });
+
+    // High level but no equipped bonus → total 0 < 2 → loses.
+    const loss = applyAction(combat({}), { type: 'RESOLVE_COMBAT', playerId: 'p1' });
+    expect(loss.ok).toBe(true);
+    if (!loss.ok) return;
+    expect(loss.state.winnerId).toBeNull();
+
+    // Equip exactly +2 vs difficulty 2 → total == difficulty → wins (>=).
+    const win = applyAction(combat({ strengths: ['str-02__700'] }), { type: 'RESOLVE_COMBAT', playerId: 'p1' });
+    expect(win.ok).toBe(true);
+    if (!win.ok) return;
+    expect(win.state.players.find((p) => p.id === 'p1')!.level).toBeGreaterThan(14);
   });
 
   it('counts an accepted helper toward the combat total', () => {
@@ -274,6 +350,16 @@ describe('full auto-played game', () => {
 
     while (s.phase !== 'game_over' && steps < MAX) {
       steps++;
+      if (s.phase === 'character_select') {
+        const chooser = s.players.find((p) => p.characterId === null)!;
+        const pick = getLegalActions(s, chooser.id).chooseableCharacters[0]!;
+        const r = applyAction(s, { type: 'CHOOSE_CHARACTER', playerId: chooser.id, characterId: pick });
+        expect(r.ok).toBe(true);
+        if (!r.ok) break;
+        s = r.state;
+        expect(sig(s)).toBe(initialSig);
+        continue;
+      }
       if (s.phase === 'await_help') {
         const r = applyAction(s, { type: 'RESPOND_TO_HELP', playerId: s.pendingHelp!.helperId, accept: false });
         expect(r.ok).toBe(true);

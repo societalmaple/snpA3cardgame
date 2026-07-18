@@ -13,7 +13,7 @@ export interface PublicPlayer {
   id: PlayerId;
   name: string;
   level: number;
-  characterId: CardInstanceId;
+  characterId: CardInstanceId | null;
   connected: boolean;
   strengths: CardInstanceId[];
   friendId: CardInstanceId | null;
@@ -39,6 +39,7 @@ export interface PlayerView {
   yourExperienceHand: CardInstanceId[];
   activeSituation: ActiveSituationView | null;
   pendingHelp: PendingHelp | null;
+  availableCharacters: CardInstanceId[]; // pickable during character select
   situationDeckCount: number;
   experienceDeckCount: number;
   situationDiscardCount: number;
@@ -81,6 +82,7 @@ export function redactFor(state: GameState, playerId: PlayerId): PlayerView {
     yourExperienceHand: you ? you.experienceHand : [],
     activeSituation,
     pendingHelp: state.pendingHelp,
+    availableCharacters: state.availableCharacters,
     situationDeckCount: state.situationDeck.length,
     experienceDeckCount: state.experienceDeck.length,
     situationDiscardCount: state.situationDiscard.length,

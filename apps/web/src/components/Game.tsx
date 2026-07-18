@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { HAND_LIMIT, type Action, type CardInstanceId, type PlayerView } from '@school-days/shared';
 import { useStore } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
+import { CharacterSelect } from './CharacterSelect.tsx';
 import { cardName } from '../cardDisplay.ts';
 import styles from './Game.module.css';
 
@@ -11,10 +12,14 @@ export function Game({ view }: { view: PlayerView }) {
   const [helpTarget, setHelpTarget] = useState('');
   const [offer, setOffer] = useState(0);
 
+  // Character selection happens before the board is shown.
+  if (view.phase === 'character_select') return <CharacterSelect view={view} />;
+
   const act = (action: Action) => sendAction(action);
   const me = view.you;
   const isMyTurn = view.currentPlayerId === me;
   const nameOf = (id: string) => view.players.find((p) => p.id === id)?.name ?? id;
+  const myName = nameOf(me);
 
   const opponents = view.players.filter((p) => p.id !== me);
   const self = view.players.find((p) => p.id === me);
@@ -44,9 +49,12 @@ export function Game({ view }: { view: PlayerView }) {
         <div className={isMyTurn ? styles.myTurn : styles.turn}>
           {winner ? `${winner} wins!` : isMyTurn ? 'Your turn' : `${nameOf(view.currentPlayerId)}'s turn`}
         </div>
-        <button className={styles.leave} onClick={leave}>
-          Leave
-        </button>
+        <div className={styles.rightBar}>
+          <span className={styles.meName}>{myName}</span>
+          <button className={styles.leave} onClick={leave}>
+            Leave
+          </button>
+        </div>
       </header>
 
       {winner && (
@@ -184,7 +192,7 @@ export function Game({ view }: { view: PlayerView }) {
         <div className={styles.selfHead}>
           <span className={styles.oName}>{self?.name} (you)</span>
           <span className={styles.level}>Lv {self?.level}</span>
-          {self && <span className={styles.charChip}>{cardName(self.characterId)}</span>}
+          {self?.characterId && <span className={styles.charChip}>{cardName(self.characterId)}</span>}
           <span className={styles.level}>
             Hand {view.yourSituationHand.length + view.yourExperienceHand.length}/{HAND_LIMIT}
           </span>

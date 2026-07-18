@@ -15,6 +15,7 @@ import { updatePlayer, pushLog, removeFirst, assertNever } from './util.ts';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type Action =
+  | { type: 'CHOOSE_CHARACTER'; playerId: PlayerId; characterId: CardInstanceId }
   | { type: 'DRAW_SITUATION'; playerId: PlayerId }
   | { type: 'PLAY_SITUATION_FROM_HAND'; playerId: PlayerId; cardId: CardInstanceId }
   | { type: 'PLAY_CARD'; playerId: PlayerId; cardId: CardInstanceId }
@@ -100,6 +101,25 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
   const isCurrent = cur.id === action.playerId;
 
   switch (action.type) {
+    case 'CHOOSE_CHARACTER': {
+      if (state.phase !== 'character_select') return fail('Characters are not being chosen right now.');
+      const player = findPlayer(state, action.playerId);
+      if (!player) return fail('No such player.');
+      if (player.characterId) return fail('You already chose a character.');
+      if (!state.availableCharacters.includes(action.characterId)) return fail('That character is taken.');
+
+      let s = updatePlayer(state, action.playerId, (p) => ({ ...p, characterId: action.characterId }));
+      s = { ...s, availableCharacters: state.availableCharacters.filter((id) => id !== action.characterId) };
+      s = pushLog(s, `${player.name} chose ${cardOf(action.characterId)?.name ?? 'a character'}.`, action.playerId);
+
+      if (s.players.every((p) => p.characterId !== null)) {
+        const first = s.players[0]!;
+        s = { ...s, phase: 'await_action', currentPlayerIndex: 0, turn: 1 };
+        s = pushLog(s, `Everyone has chosen — ${first.name} goes first.`, first.id);
+      }
+      return done(s);
+    }
+
     case 'DRAW_SITUATION': {
       if (!isCurrent) return fail('Not your turn.');
       if (state.phase !== 'await_action') return fail('You can only draw at the start of your turn.');
@@ -395,6 +415,7 @@ export interface LegalActions {
   mustDiscard: boolean;
   discardable: CardInstanceId[]; // cards you may discard while over the hand limit
   unequippable: CardInstanceId[]; // equipped cards you may return to your hand
+  chooseableCharacters: CardInstanceId[]; // characters you may pick during setup
 }
 
 function emptyLegal(): LegalActions {
@@ -410,6 +431,7 @@ function emptyLegal(): LegalActions {
     mustDiscard: false,
     discardable: [],
     unequippable: [],
+    chooseableCharacters: [],
   };
 }
 
@@ -433,6 +455,12 @@ export function getLegalActions(state: GameState, playerId: PlayerId): LegalActi
 
   const player = findPlayer(state, playerId);
   if (!player) return legal;
+
+  // Character selection is simultaneous — any player who hasn't chosen may pick.
+  if (state.phase === 'character_select') {
+    legal.chooseableCharacters = player.characterId === null ? state.availableCharacters : [];
+    return legal;
+  }
 
   // The helper responding is the only non-current-player action.
   if (state.phase === 'await_help') {

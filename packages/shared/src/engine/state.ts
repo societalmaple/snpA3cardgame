@@ -7,6 +7,7 @@ export type PlayerId = string;
  * phase where a *non-current* player (the chosen helper) must act.
  */
 export type Phase =
+  | 'character_select' // everyone picks a Character before play begins
   | 'await_action' // current player must draw or play a Situation from hand
   | 'combat' // a Situation is active; play cards / ask help / resolve
   | 'await_help' // waiting for the chosen helper to accept/decline
@@ -25,7 +26,8 @@ export interface PlayerState {
   id: PlayerId;
   name: string;
   level: number;
-  characterId: CardInstanceId;
+  /** Null until the player picks one during the character-select phase. */
+  characterId: CardInstanceId | null;
   connected: boolean;
   /** Private, held cards, split per spec into the two "hands". */
   situationHand: CardInstanceId[]; // situations, clubs, levelups held
@@ -61,6 +63,8 @@ export interface GameState {
   situationDiscard: CardInstanceId[];
   experienceDeck: CardInstanceId[];
   experienceDiscard: CardInstanceId[];
+  /** Characters not yet picked during the character-select phase. */
+  availableCharacters: CardInstanceId[];
 
   activeSituation: ActiveSituation | null;
   pendingHelp: PendingHelp | null;

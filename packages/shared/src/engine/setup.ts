@@ -54,17 +54,16 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
   rngState = shuffledSit.state;
   const shuffledExp = shuffle(exp.instances, rngState);
   rngState = shuffledExp.state;
-  const shuffledChars = shuffle(charInstances, rngState);
-  rngState = shuffledChars.state;
 
   const situationDeck = shuffledSit.items;
   const experienceDeck = shuffledExp.items;
 
-  const players: PlayerState[] = playerSeeds.map((ps, idx) => ({
+  // Characters are not dealt — players pick during the character-select phase.
+  const players: PlayerState[] = playerSeeds.map((ps) => ({
     id: ps.id,
     name: ps.name,
     level: STARTING_LEVEL,
-    characterId: shuffledChars.items[idx]!,
+    characterId: null,
     connected: true,
     situationHand: [],
     experienceHand: [],
@@ -82,7 +81,7 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
   }
 
   return {
-    phase: 'await_action',
+    phase: 'character_select',
     players,
     currentPlayerIndex: 0,
     turn: 1,
@@ -90,12 +89,13 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
     situationDiscard: [],
     experienceDeck,
     experienceDiscard: [],
+    availableCharacters: charInstances,
     activeSituation: null,
     pendingHelp: null,
     resumeAfterDiscard: null,
     winnerId: null,
     rngState,
-    log: [{ id: 0, turn: 1, message: 'Game started.' }],
+    log: [{ id: 0, turn: 1, message: 'Players are choosing characters.' }],
     nextEventId: 1,
     turnFlags: { enteredCombatThisTurn: false },
   };

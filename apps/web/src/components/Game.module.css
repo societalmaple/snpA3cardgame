@@ -26,6 +26,15 @@
   color: #98c379;
   font-weight: 700;
 }
+.rightBar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.meName {
+  font-weight: 700;
+  color: #ffd166;
+}
 .leave {
   background: transparent;
   border: 1px solid #3a3f52;

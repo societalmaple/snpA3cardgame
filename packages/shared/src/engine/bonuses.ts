@@ -19,9 +19,9 @@ export function equippedBonus(player: PlayerState): number {
   return bonus;
 }
 
-/** A player's total problem-solving power: Level + equipped bonuses. */
+/** A player's problem-solving power for combat: equipped bonuses only (Level does not count). */
 export function playerPower(player: PlayerState): number {
-  return player.level + equippedBonus(player);
+  return equippedBonus(player);
 }
 
 export interface CombatMath {
@@ -54,6 +54,6 @@ export function combatMath(state: GameState): CombatMath | null {
     attackerPower,
     helperPower,
     total,
-    wins: total > situation.difficulty,
+    wins: total >= situation.difficulty,
   };
 }

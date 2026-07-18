@@ -68,12 +68,17 @@ that checks every card is conserved and a winner emerges.
 
 ## How to play
 
+Before the first turn, every player picks a **Character** (a permanent passive that
+is never discarded) on the character-select screen. Once everyone has chosen, play
+begins.
+
 On your turn you either **draw a Situation** or **take on a Situation from your
 hand**:
 
-- **Situation** → you fight it. Your total is `Level + Strength + Friend + Club`
-  bonuses. If your total is **strictly greater** than the Situation's difficulty you
-  win: gain levels and Experience cards. Otherwise you suffer its consequences.
+- **Situation** → you fight it. Your total is your equipped `Strength + Friend + Club`
+  bonuses (**your Level does not count**). If your total is **greater than or equal
+  to** the Situation's difficulty you win: gain levels and Experience cards.
+  Otherwise you suffer its consequences.
 - **Mess-Up** → resolves immediately (something bad happens).
 - **Club / Go-Up-A-Level** → goes into your hand to play later.
 
@@ -95,6 +100,7 @@ toss the new card or an older one.
 
 ## Features
 
+- Pre-game character selection (each Character is unique per game).
 - Authoritative server with a pure, deterministic (seeded) game engine.
 - Per-player state redaction — you see your hands; opponents show public info +
   card *counts* only.
