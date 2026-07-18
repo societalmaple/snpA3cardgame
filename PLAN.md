@@ -4,6 +4,10 @@ A responsive, online, multiplayer web card game for 2–4 players. Players race 
 **Well-Being Level 5**; the winning level must normally come from *solving a
 Situation*. Full game design lives in [`directions.md`](./directions.md).
 
+> **Status:** all phases implemented. Engine + server logic are runtime-verified
+> (Vitest suites in `packages/shared`). Run `npm install` then `npm test` / `npm run dev`.
+> See [`CLAUDE.md`](./CLAUDE.md) for commands and architecture.
+
 ## Locked decisions
 
 | Topic | Decision |

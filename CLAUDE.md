@@ -2,74 +2,94 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Current state
+## What this is
 
-This repository is **pre-implementation**. It currently contains only planning
-documents — there is no source code, build system, or tests yet:
+An online, multiplayer web card game ("School Days", working title) for 2–4 players.
+Players race to Well-Being **Level 5**; the winning level must come from *solving a
+Situation*. Full game design is in [`directions.md`](./directions.md); the build
+plan and decisions are in [`PLAN.md`](./PLAN.md).
 
-- `directions.md` — the authoritative design spec and coding plan for a card game
-  currently titled **"School Days"** (name is a placeholder). Read this in full
-  before writing any game code; the sections below only summarize it.
-- `README.md` — placeholder.
+## Commands
 
-When you begin implementation, this file should be updated with the real build,
-lint, test, and run commands for whatever stack is chosen.
+Run from the repo root (npm workspaces):
 
-## What is being built
+```bash
+npm install            # required first; the public npm registry must be reachable
+npm test               # run all Vitest suites (engine tests live in packages/shared)
+npm run test:watch     # watch mode
+npm run typecheck      # tsc --noEmit across every workspace
+npm run lint           # eslint (flat config)
+npm run dev            # run server + web together (concurrently)
+npm run dev:server     # server only (Socket.IO, defaults to :3001, PORT env to override)
+npm run dev:web        # web only (Vite dev server on :5173)
+npm run build          # build all buildable workspaces (web)
+```
 
-A responsive, online, web-based **multiplayer card game for 2–4 players**. Players
-race to be first to reach **Well-Being Level 5** — but the final winning level must
-normally come from *solving a Situation*, not from "Go Up A Level" cards or other
-effects.
+Run a single test file: `npx vitest run packages/shared/src/engine/engine.test.ts`
+(add `-t "name"` to filter by test name).
 
-### Core rules that drive the engine
+The web client reads `VITE_SERVER_URL` (defaults to `http://localhost:3001`).
 
-- Each player starts at Level 1 with 4 Experience cards and 1 random Character.
-- Before play, a player may activate one Club, one Friend, and any Rank 1 Strengths.
-- Default limits: 1 Character, 1 Friend, 1 Club, unlimited Strengths.
-- Each turn a player either draws from the Situation deck or solves a Situation
-  already in hand. Drawn Situations go to hand; Mess-Up cards resolve immediately
-  and are discarded.
-- Solving a Situation compares
-  `Player Level + Strength bonuses + Friend bonus + Club bonus` against the
-  Situation difficulty. Success requires the total to be **strictly greater** than
-  the difficulty.
-- Success awards Experience cards + Levels; failure applies the Situation's
-  consequences.
-- A player may ask one other player for help: totals combine, the active player
-  keeps all Level rewards, and Experience rewards split by an agreed deal.
-- The engine must auto-manage turn order, rewards, consequences, active bonuses,
-  victory detection, discard piles, and deck reshuffling.
+### Quick engine checks without installing
 
-### Card types (placeholder counts to generate)
+Node 25 runs TypeScript directly with `node --experimental-transform-types <file>`
+(needs the `--experimental-transform-types` flag; plain `node file.ts` fails on
+enums). Because all relative imports use explicit `.ts` extensions, you can import
+engine modules straight from `packages/shared/src` in a scratch script to exercise
+the reducer without `npm install`. To resolve the `@school-days/shared` bare
+specifier this way, symlink it first:
+`mkdir -p node_modules/@school-days && ln -sfn ../../packages/shared node_modules/@school-days/shared`.
 
-- 20 Situation cards, 4–5 Mess-Up cards, 7 Club cards, 3–4 "Go Up A Level" cards
-- 8 Strength cards (Howard Gardner's eight Multiple Intelligences), 6 Friend cards
-- 4 Character cards (each has a permanent passive; male/female sides)
-- Two separate decks — **Situation** and **Experience** — each with its own
-  discard pile.
+## Architecture
 
-## Architectural constraints (from the spec)
+npm-workspaces monorepo. **The server is authoritative; clients are thin.**
 
-These are hard requirements from `directions.md`, not suggestions:
+```
+packages/shared/   pure game engine + card data + types + network protocol
+apps/server/       Socket.IO server: rooms, lobby, authority, per-player redaction
+apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
+```
 
-- **Use placeholder cards and placeholder artwork only.** Real names, images,
-  descriptions, bonuses, rewards, and effects come later. Placeholder graphics
-  should label the card type and a placeholder number.
-- **Store all card definitions in editable JSON or TypeScript data files** so cards
-  can be changed without touching the game engine. Add comments marking exactly
-  where future developers insert final art and edit each card's stats/text/
-  effects/rewards/consequences.
-- **Keep game logic separate from the interface.** Implement card effects through
-  reusable, data-driven effect definitions — avoid hardcoded per-card functions.
-- **Authoritative server-side game state** for online multiplayer, with a lobby/room
-  structure, player join + ready status, turn synchronization, reconnect handling,
-  and validation so players cannot make illegal moves or read/edit another player's
-  private state.
-- Use a clear folder split for: UI components, game engine logic,
-  multiplayer/networking, state management, card data, types, and placeholder assets.
+### `packages/shared` — the engine (start here)
+- **Pure & deterministic.** `engine/reduce.ts` `applyAction(state, action)` returns a
+  `Result` (never throws on bad input) and is the *only* way to mutate game state.
+  Randomness is a seeded PRNG threaded through state (`engine/rng.ts`), so games are
+  reproducible; the seed lives server-side and is never sent to clients.
+- **Data-driven effects.** Cards carry `Effect` descriptors (e.g.
+  `{ type: 'LOSE_LEVEL', amount: 1 }`) interpreted by `engine/effects.ts`. There is
+  no per-card code. Card data is in `cards/data/*.ts`; see [`docs/adding-cards.md`](./docs/adding-cards.md).
+- **Card instances.** Decks hold multiple copies of a definition, so state tracks
+  *instance* ids (`str-01__12`); use `cardOf(id)` / `defIdOf(id)` from `cards/index.ts`.
+- **One source of truth for legality.** `getLegalActions(state, playerId)` drives both
+  server validation and client button-enabling.
+- **Redaction.** `engine/redact.ts` `redactFor(state, playerId)` produces the
+  `PlayerView` each client receives: own hands in full, opponents reduced to public
+  info + hand *counts*, decks reduced to counts.
+- `constants.ts` holds tunables (target level, starting hand, player bounds).
+- `protocol.ts` is the typed Socket.IO contract shared by both ends.
 
-## Integration note
+### `apps/server`
+- `rooms.ts` `RoomManager` — in-memory (no DB), anonymous 4-letter room codes, lobby
+  → ready → start, reconnect via a per-player token. It owns the full `GameState` and
+  runs `applyAction`. `index.ts` wires it to Socket.IO and broadcasts a redacted
+  `game:view` to each player after every change. **Server forces `action.playerId` to
+  the authenticated sender** — clients can't act as anyone else.
 
-The game is meant to be integrated into an existing website **without changing
-unrelated pages or assets**. Do **not** inspect, process, or use any mascot images.
+### `apps/web`
+- `store.ts` (Zustand) holds the socket, the current `RoomState`, and the latest
+  redacted `PlayerView`; it persists the session to `localStorage` for reconnect.
+- `components/` — `Lobby`, `Game`, `PlaceholderCard`. UI enables controls purely from
+  `view.legal`. Styling is scoped CSS Modules; no global-style leakage.
+
+## Conventions
+- **Relative imports use explicit `.ts`/`.tsx` extensions** (tsconfig has
+  `allowImportingTsExtensions`). This keeps files runnable by bare Node *and* by
+  Vite/Vitest. Cross-package imports use the bare `@school-days/shared` specifier.
+- Keep game logic in `packages/shared`; never put rules in the server or UI.
+- To add/change cards, edit data files only — see `docs/adding-cards.md`.
+- Placeholder art only; do not add or use mascot images (per `directions.md`).
+
+## Status / not yet done
+- Persistence is in-memory only; state is lost on server restart (by design for now).
+- If the *current* player disconnects mid-turn, the turn does not auto-skip; they can
+  reconnect (session token) to resume while the server is up.

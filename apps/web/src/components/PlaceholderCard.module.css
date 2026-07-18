@@ -1,0 +1,81 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 8.5rem;
+  min-height: 11rem;
+  padding: 0.6rem;
+  border-radius: 0.6rem;
+  border: 2px solid var(--edge, #3a3f52);
+  background: linear-gradient(160deg, #232838, #1a1e2b);
+  color: #e7e9f3;
+  text-align: left;
+  font: inherit;
+  cursor: default;
+}
+
+.sm {
+  width: 6.5rem;
+  min-height: 8.5rem;
+  padding: 0.45rem;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.selected {
+  outline: 3px solid #ffd166;
+  outline-offset: 1px;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.type {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--edge, #9aa0b5);
+}
+
+.art {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  margin: 0.2rem 0;
+  border-radius: 0.4rem;
+  background: repeating-linear-gradient(45deg, #2b3145, #2b3145 8px, #262b3d 8px, #262b3d 16px);
+  color: #cfd3e6;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  min-height: 4.5rem;
+}
+
+.name {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.stat {
+  font-size: 0.68rem;
+  color: #aab0c6;
+  line-height: 1.2;
+}
+
+/* Type accent colors (drive the --edge custom property). */
+.card[data-type='situation'] { --edge: #e06c75; }
+.card[data-type='messup'] { --edge: #d19a66; }
+.card[data-type='club'] { --edge: #61afef; }
+.card[data-type='levelup'] { --edge: #98c379; }
+.card[data-type='strength'] { --edge: #c678dd; }
+.card[data-type='friend'] { --edge: #56b6c2; }
+.card[data-type='character'] { --edge: #ffd166; }

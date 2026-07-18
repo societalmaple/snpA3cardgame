@@ -1,13 +1,25 @@
-import { GAME_NAME, TARGET_LEVEL } from '@school-days/shared';
+import { useEffect } from 'react';
+import { useStore } from './store.ts';
+import { Lobby } from './components/Lobby.tsx';
+import { Game } from './components/Game.tsx';
+import styles from './App.module.css';
 
 export function App() {
+  const { init, room, view, error, clearError } = useStore();
+
+  useEffect(() => {
+    init();
+  }, [init]);
+
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem' }}>
-      <h1>{GAME_NAME}</h1>
-      <p>
-        Scaffold ready. First to Well-Being Level {TARGET_LEVEL} wins. The lobby and
-        game UI arrive in Phase 2.
-      </p>
-    </main>
+    <>
+      {room && view && room.phase !== 'lobby' ? <Game view={view} /> : <Lobby />}
+      {error && (
+        <button className={styles.toast} onClick={clearError}>
+          {error}
+          <span className={styles.dismiss}>✕</span>
+        </button>
+      )}
+    </>
   );
 }

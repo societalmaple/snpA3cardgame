@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@school-days/shared": "*"
+    "@school-days/shared": "*",
+    "socket.io": "^4.8.0"
   }
 }
