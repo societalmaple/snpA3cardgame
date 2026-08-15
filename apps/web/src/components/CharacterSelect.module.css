@@ -1,11 +1,20 @@
 .wrap {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: url('/snpbg2.jpeg') center/cover no-repeat fixed;
   position: relative;
   isolation: isolate;
+}
+
+/* Fixed-layer background so the image never scrolls or crops on mobile. */
+.wrap::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url('/snpbg2.jpeg') center/cover no-repeat;
 }
 
 .overlay {
@@ -18,7 +27,7 @@
 
 .paletteSelector {
   position: fixed;
-  top: 1rem;
+  top: max(1rem, env(safe-area-inset-top));
   right: 1rem;
   z-index: 10;
   display: flex;
@@ -75,7 +84,7 @@
 
 .helpBtn {
   position: fixed;
-  top: 1rem;
+  top: max(1rem, env(safe-area-inset-top));
   left: 1rem;
   z-index: 10;
   width: 4.35rem;
@@ -104,7 +113,7 @@
 .panel {
   position: relative;
   z-index: 1;
-  width: min(48rem, 96vw);
+  width: min(48rem, 100%);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -140,6 +149,10 @@
   border-radius: 0.75rem;
   background: var(--player-item);
   border: 1px solid var(--player-item-border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
 }
 
 .players {
@@ -171,4 +184,37 @@
 .waiting {
   color: var(--accent);
   font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 1rem;
+  }
+  .cards {
+    justify-content: flex-start;
+  }
+  .paletteSelector {
+    right: 0.75rem;
+  }
+  .paletteSelect {
+    font-size: 1rem;
+    padding: 0.55rem 1.9rem 0.55rem 0.9rem;
+  }
+  .helpBtn {
+    left: 0.75rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.9rem;
+  }
+  .randomizeBtn {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+}
+
+/* Short, landscape phones: keep the corner buttons clear of the centered panel. */
+@media (max-width: 640px) and (max-height: 560px) {
+  .panel {
+    margin-top: 4rem;
+  }
 }

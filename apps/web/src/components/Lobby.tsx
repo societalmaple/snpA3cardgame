@@ -3,14 +3,35 @@ import { MIN_PLAYERS, MAX_PLAYERS, PALETTES } from '@school-days/shared';
 import { useStore } from '../store.ts';
 import { HelpScreen } from './HelpScreen.tsx';
 import { Tutorial } from './Tutorial.tsx';
+import { HelpMenu } from './HelpMenu.tsx';
 import styles from './Lobby.module.css';
 
 export function Lobby() {
   const { room, session, connected, createRoom, joinRoom, setReady, startGame, leave, palette, refreshPalette, setPalette } = useStore();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [showMenu, setShowMenu] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+
+  const toggleMenu = () => {
+    if (showHelp || showTutorial) {
+      setShowHelp(false);
+      setShowTutorial(false);
+    } else {
+      setShowMenu((open) => !open);
+    }
+  };
+  const openTutorial = () => {
+    setShowMenu(false);
+    setShowHelp(false);
+    setShowTutorial(true);
+  };
+  const openHelp = () => {
+    setShowMenu(false);
+    setShowTutorial(false);
+    setShowHelp(true);
+  };
 
   const cssVars = {
     '--bg': palette.colors.background,
@@ -57,21 +78,20 @@ export function Lobby() {
             🎲
           </button>
         </div>
+        <div className={styles.topRight}>
+          <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
+            ?
+          </button>
+        </div>
+        {showMenu && !showHelp && !showTutorial && (
+          <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />
+        )}
         {showHelp ? (
           <HelpScreen onClose={() => setShowHelp(false)} />
         ) : showTutorial ? (
           <Tutorial onClose={() => setShowTutorial(false)} />
         ) : (
-          <>
-            <div className={styles.topRight}>
-              <button className={styles.tutorialBtn} onClick={() => setShowTutorial(true)} aria-label="Interactive tutorial" title="Interactive tutorial">
-                Tutorial
-              </button>
-              <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play" title="How to play">
-                ?
-              </button>
-            </div>
-            <div className={styles.panel}>
+          <div className={styles.panel}>
           <h1 className={styles.title}>Solve It!</h1>
           <p className={styles.sub}>Online card game for {MIN_PLAYERS}–{MAX_PLAYERS} players</p>
 
@@ -105,7 +125,6 @@ export function Lobby() {
 
 {!connected && <p className={styles.warn}>Connecting to server…</p>}
             </div>
-          </>
         )}
       </div>
     );
@@ -136,21 +155,20 @@ export function Lobby() {
           🎲
         </button>
       </div>
+      <div className={styles.topRight}>
+        <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
+          ?
+        </button>
+      </div>
+      {showMenu && !showHelp && !showTutorial && (
+        <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />
+      )}
       {showHelp ? (
         <HelpScreen onClose={() => setShowHelp(false)} />
       ) : showTutorial ? (
         <Tutorial onClose={() => setShowTutorial(false)} />
       ) : (
-        <>
-          <div className={styles.topRight}>
-            <button className={styles.tutorialBtn} onClick={() => setShowTutorial(true)} aria-label="Interactive tutorial" title="Interactive tutorial">
-              Tutorial
-            </button>
-            <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play" title="How to play">
-              ?
-            </button>
-          </div>
-          <div className={styles.panel}>
+        <div className={styles.panel}>
         <h1 className={styles.title}>Room {room.code}</h1>
         <p className={styles.sub}>Share this code so friends can join.</p>
 
@@ -184,7 +202,6 @@ export function Lobby() {
           Leave room
         </button>
         </div>
-        </>
       )}
     </div>
   );

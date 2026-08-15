@@ -1,11 +1,20 @@
 .wrap {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: url('/snpbg2.jpeg') center/cover no-repeat fixed;
   position: relative;
   isolation: isolate;
+}
+
+/* Fixed-layer background so the image never scrolls or crops on mobile. */
+.wrap::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url('/snpbg2.jpeg') center/cover no-repeat;
 }
 
 .overlay {
@@ -18,7 +27,7 @@
 
 .paletteSelector {
   position: fixed;
-  top: 1rem;
+  top: max(1rem, env(safe-area-inset-top));
   right: 1rem;
   z-index: 10;
   display: flex;
@@ -75,31 +84,12 @@
 
 .topRight {
   position: fixed;
-  top: 1rem;
+  top: max(1rem, env(safe-area-inset-top));
   left: 1rem;
   z-index: 10;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.tutorialBtn {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  color: var(--text-primary);
-  border-radius: 0.4rem;
-  padding: 0.9rem 1.65rem;
-  font: inherit;
-  font-size: 1.5rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
-}
-.tutorialBtn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--ghost-hover);
-  transform: translateY(-1px);
 }
 
 .helpBtn {
@@ -289,4 +279,39 @@
 }
 .warn {
   color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 1rem;
+  }
+  .panel {
+    padding: 1.25rem;
+  }
+  .paletteSelector {
+    right: 0.75rem;
+  }
+  .paletteSelect {
+    font-size: 1rem;
+    padding: 0.55rem 1.9rem 0.55rem 0.9rem;
+  }
+  .topRight {
+    left: 0.75rem;
+  }
+  .helpBtn {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.9rem;
+  }
+  .randomizeBtn {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+}
+
+/* Short, landscape phones: keep the corner buttons clear of the centered panel. */
+@media (max-width: 640px) and (max-height: 560px) {
+  .panel {
+    margin-top: 4rem;
+  }
 }

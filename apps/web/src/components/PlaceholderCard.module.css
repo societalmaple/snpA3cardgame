@@ -9,8 +9,9 @@
   border: 2px solid var(--edge, #3a3f52);
   background: linear-gradient(160deg, #232838, #1a1e2b);
   color: #e7e9f3;
-  text-align: left;
+  text-align: center;
   font: inherit;
+  overflow-wrap: break-word;
   cursor: default;
 }
 
@@ -62,7 +63,7 @@
 }
 
 .type {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 700;
@@ -71,39 +72,42 @@
 
 .art {
   flex: 1;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   margin: 0.2rem 0;
   border-radius: 0.4rem;
   background: repeating-linear-gradient(45deg, #2b3145, #2b3145 8px, #262b3d 8px, #262b3d 16px);
   color: #cfd3e6;
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+  padding: 0.25rem 0.15rem;
   min-height: 4.5rem;
 }
 
 .name {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 .stat {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: #aab0c6;
   line-height: 1.2;
 }
 .consequence {
-  font-size: 0.64rem;
+  font-size: 0.66rem;
   color: #e06c75;
   line-height: 1.2;
 }
 .barriers {
-  font-size: 0.64rem;
+  font-size: 0.66rem;
   color: #d19a66;
   line-height: 1.2;
 }
 .connection {
-  font-size: 0.64rem;
+  font-size: 0.66rem;
   color: #98c379;
   line-height: 1.2;
   background: rgba(152, 195, 121, 0.1);
@@ -113,11 +117,28 @@
   margin-top: 0.25rem;
 }
 .teach {
-  font-size: 0.62rem;
+  font-size: 0.66rem;
   color: #61afef;
   line-height: 1.2;
   font-style: italic;
   margin-top: 0.25rem;
+}
+
+/* Small cards use slightly smaller type so text still fits. */
+.sm .name {
+  font-size: 0.75rem;
+}
+.sm .stat {
+  font-size: 0.62rem;
+}
+.sm .consequence,
+.sm .barriers,
+.sm .connection,
+.sm .teach {
+  font-size: 0.58rem;
+}
+.sm .type {
+  font-size: 0.55rem;
 }
 
 /* Type accent colors (drive the --edge custom property). */
@@ -130,3 +151,15 @@
 .card[data-type='character'] { --edge: #ffd166; }
 .card[data-type='support'] { --edge: #61afef; }
 .card[data-type='selfadvocacy'] { --edge: #98c379; }
+
+@media (max-width: 640px) {
+  .card {
+    width: 7.5rem;
+    min-height: 9.75rem;
+  }
+  .sm {
+    width: 5.5rem;
+    min-height: 7.5rem;
+    padding: 0.4rem;
+  }
+}

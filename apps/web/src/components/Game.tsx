@@ -16,10 +16,22 @@ export function Game({ view }: { view: PlayerView }) {
   const [showHelp, setShowHelp] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
 
+  const toggleTutorial = () => {
+    setShowHelp(false);
+    setShowTutorial((open) => !open);
+  };
+  const toggleHelp = () => {
+    setShowTutorial(false);
+    setShowHelp((open) => !open);
+  };
+
   // Character selection happens before the board is shown.
   if (view.phase === 'character_select') return <CharacterSelect view={view} />;
 
   const act = (action: Action) => sendAction(action);
+  const confirmLeave = () => {
+    if (window.confirm('Leave the room? You will give up your seat in this game.')) leave();
+  };
   const me = view.you;
   const isMyTurn = view.currentPlayerId === me;
   const nameOf = (id: string) => view.players.find((p) => p.id === id)?.name ?? id;
@@ -85,13 +97,13 @@ export function Game({ view }: { view: PlayerView }) {
         </div>
         <div className={styles.rightBar}>
           <span className={styles.meName}>{myName}</span>
-          <button className={styles.tutorialBtn} onClick={() => setShowTutorial(true)} aria-label="Interactive tutorial" title="Interactive tutorial">
+          <button className={styles.tutorialBtn} onClick={toggleTutorial} aria-label="Interactive tutorial" title="Interactive tutorial">
             Tutorial
           </button>
-          <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play" title="How to play">
+          <button className={styles.helpBtn} onClick={toggleHelp} aria-label="How to play" title="How to play">
             ?
           </button>
-          <button className={styles.leave} onClick={leave}>
+          <button className={styles.leave} onClick={confirmLeave}>
             Leave
           </button>
           <div className={styles.paletteSelector}>

@@ -5,6 +5,8 @@ import type { ClientToServerEvents, ServerToClientEvents } from '@school-days/sh
 export type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 export function createSocket(): GameSocket {
-  const url = import.meta.env.VITE_SERVER_URL ?? 'http://localhost:3001';
+  // VITE_SERVER_URL overrides; otherwise connect to the same host that served
+  // this page (localhost on the dev machine, the LAN IP on other devices).
+  const url = import.meta.env.VITE_SERVER_URL ?? `http://${window.location.hostname}:3001`;
   return io(url, { autoConnect: true });
 }

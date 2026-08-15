@@ -1,11 +1,20 @@
 .wrap {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: url('/snpbg2.jpeg') center/cover no-repeat fixed;
   position: relative;
   isolation: isolate;
+}
+
+/* Fixed-layer background so the image never scrolls or crops on mobile. */
+.wrap::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url('/snpbg2.jpeg') center/cover no-repeat;
 }
 
 .overlay {
@@ -19,7 +28,7 @@
 .panel {
   position: relative;
   z-index: 1;
-  width: min(46rem, 92vw);
+  width: min(46rem, 100%);
   max-height: 92vh;
   overflow-y: auto;
   display: flex;
