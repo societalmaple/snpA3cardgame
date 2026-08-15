@@ -46,6 +46,31 @@ the repo root.
 > The client talks to `http://localhost:3001` by default. To point it elsewhere, set
 > `VITE_SERVER_URL`. To change the server port, set `PORT` (e.g. `PORT=4000 npm run dev:server`).
 
+## GitHub Pages
+
+The web client builds to static files and can be served from GitHub Pages. Because
+Pages only hosts static content, the Socket.IO **server must run somewhere else**;
+set the Pages site's `VITE_SERVER_URL` repository variable to that server's URL.
+
+On every push to `main`, [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml)
+builds the client (with `base = /snpA3cardgame/` and `VITE_SERVER_URL`) and deploys
+it to GitHub Pages:
+
+1. In the repo, go to **Settings → Pages** and set **Source** to **GitHub Actions**.
+2. Add the server URL as a repository variable named `VITE_SERVER_URL`
+   (**Settings → Secrets and variables → Actions → Variables**).
+3. Push to `main` (or run the workflow manually via **Actions → Deploy web to
+   GitHub Pages → Run workflow**).
+
+The site will be at `https://societalmaple.github.io/snpA3cardgame/`.
+
+To preview the built site locally at the Pages path:
+
+```bash
+npm run build -w @school-days/web
+npx vite preview --outDir apps/web/dist --base /snpA3cardgame/
+```
+
 ## Testing
 
 ```bash
