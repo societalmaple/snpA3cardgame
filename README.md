@@ -68,41 +68,87 @@ that checks every card is conserved and a winner emerges.
 
 ## How to play
 
-Before the first turn, every player picks a **Character** (a permanent passive that
-is never discarded) on the character-select screen. Once everyone has chosen, play
-begins.
+This game teaches a **strengths-based view of neurodiversity**: people have different
+ways of thinking and functioning, and difficulties usually come from a *mismatch
+between a person and their environment*, not from being less capable. You win by
+solving Situations through supports, self-advocacy, and community, not just by
+"trying harder". An interactive tutorial is available from the Lobby and in-game.
 
-On your turn you either **draw a Situation** or **take on a Situation from your
-hand**:
+### Setup
 
-- **Situation** → you fight it. Your total is your equipped `Strength + Friend + Club`
-  bonuses (**your Level does not count**). If your total is **greater than or equal
-  to** the Situation's difficulty you win: gain levels and Experience cards.
-  Otherwise you suffer its consequences (**listed on the card**). If a consequence
-  makes you discard cards, you choose which to lose, you may even discard equipped
-  cards.
-- **Mess-Up** → resolves immediately (something bad happens).
-- **Club / Go-Up-A-Level** → goes into your hand to play later.
+Before the first turn, every player picks a **Character** (a permanent passive
+ability, never discarded; each is unique). Once everyone has chosen, play begins.
 
-Before resolving a fight you can equip Strengths/Friends/Clubs from your hand to
-boost your total, or **ask another player for help** (their bonuses join yours; you
-keep all the levels, they get the Experience you offered). If you don't fight at all
-this turn, you draw one Experience card instead ("gain problem-solving ability").
+### Your turn
 
-**Strengths are single-use:** whichever Strengths you have equipped when you *solve*
-a Situation are used up and discarded (Friends and Clubs stay). You can also
-**unequip** any equipped card during your turn to return it to your hand.
+At the start of your turn you **draw a Situation** from the Situation deck (or take
+on a Situation you're holding in your hand):
+
+- **Situation** → you face a *barrier* (noise, crowding, time pressure, unclear
+  instructions, sensory overload, social pressure, …). Solve it during combat (below).
+- **Mess-Up** → the environment threw up a barrier (Sensory Overload Spot, an
+  unexpected routine change, …). You can usually **mitigate** it with a matching
+  Support, Self-Advocacy card, Strength, or Friend. If you can't (or choose not to),
+  you only take a small **temporary penalty** on your *next* Situation, never a
+  permanent loss.
+- **Go Up A Level** → goes into your Situation hand to play later.
+
+### Combat: multiple valid solutions
+
+Every Situation has a **base difficulty** (plus any temporary penalty carried over
+from an unmitigated Mess-Up). Your **total** is your equipped
+`Strength + Friend + Club` bonuses (**your Level does not count**). You win when
+`total ≥ modified difficulty`, where the difficulty is reduced by **any valid
+approach** you bring:
+
+- a **relevant Strength** that fits the Situation,
+- an **active Support / Accommodation** (up to 2 equipped) that removes a barrier,
+- a **Self-Advocacy card** played during combat that addresses the barriers,
+- a **Friend or Club** (or your Character) that matches the barrier.
+
+The screen shows *your approach* and the *modified difficulty*, these are different
+valid solutions, not a hidden correct answer. Win and you gain levels + Experience
+cards; solving via a matched Strength, Support, or Self-Advocacy also **discovers** a
+new approach (an extra Experience card). Fail and you suffer the consequences listed
+on the card (some can be cancelled with Self-Advocacy); a discard consequence lets
+you choose what to lose, including equipped cards.
+
+### Cards
+
+- **Support / Accommodation** — tools and environmental changes that remove barriers
+  (Quiet Workspace, Written Instructions, Extra Processing Time, …). Not "power-ups":
+  they change the conditions so existing abilities can be used.
+- **Self-Advocacy** — one-shot cards you play while facing a Situation ("Can I Have
+  That in Writing?", "I Need More Processing Time", …). Asking for a support is a
+  skill, not a failure.
+- **Strength** — a modest base bonus plus a **contextual** effect; they shine when
+  they fit the Situation. Strengths are **used up** when you solve a Situation
+  (Friends and Clubs stay).
+- **Friend** — co-regulation and collaboration (limit 1 equipped).
+- **Club** — a supportive community (limit 1 equipped). Clubs are Experience cards:
+  they come from Experience draws, not the Situation deck.
+- **Go Up A Level** — raises Well-Being but can never be the winning level.
+
+Before resolving you can equip Strengths/Friends/Clubs/Supports from your hands, or
+**ask another player for help** (their bonuses join yours; you keep the levels, they
+get the Experience you offered). If you end your turn without fighting, you draw one
+Experience card instead ("gain problem-solving ability").
 
 **First to Level 15 wins, but only if that final level came from solving a
 Situation.** Go-Up-A-Level cards can carry you to Level 14 but never win the game.
 
-You can hold at most **6 cards** across your hands. If a card you draw or earn puts
-you over the limit, you must discard down to 6, you choose what to keep, so you can
-toss the new card or an older one.
+You can hold at most **6 cards** across your two hands. If a draw or reward puts you
+over the limit, you discard down to 6, and you choose what to keep (toss the new card
+or an older one).
 
 ## Features
 
+- Strengths-based gameplay: Situations with barriers and **multiple valid solutions**
+  (Strengths, Supports, Self-Advocacy, Friends/Clubs, environmental changes, teamwork).
+- **Support / Accommodation** and **Self-Advocacy** card types, plus Mess-Ups that can
+  be **mitigated** instead of always punished.
 - Pre-game character selection (each Character is unique per game).
+- Interactive **tutorial** plus an in-game help screen.
 - Authoritative server with a pure, deterministic (seeded) game engine.
 - Per-player state redaction, you see your hands; opponents show public info +
   card *counts* only.
