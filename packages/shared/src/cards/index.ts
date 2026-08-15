@@ -1,4 +1,4 @@
-import type { Card, CardId, CardInstanceId } from './types.ts';
+import type { Card, CardId, CardInstanceId, MessUpCard } from './types.ts';
 import { SITUATIONS } from './data/situations.ts';
 import { MESSUPS } from './data/messups.ts';
 import { CLUBS } from './data/clubs.ts';
@@ -55,6 +55,20 @@ export const EXPERIENCE_DECK_RECIPE: DeckEntry[] = [
 
 /** Character definition ids (dealt one per player, not shuffled into a deck). */
 export const CHARACTER_DEFS: CardId[] = CHARACTERS.map((c) => c.id);
+
+/**
+ * Self-Advocacy definitions that can logically mitigate a Mess-Up: the Mess-Up's
+ * curated list plus every Self-Advocacy whose declared barriers match the Mess-Up's
+ * barrier (mirrors how a Strength's `addressesBarriers` connects to Situations).
+ */
+export function selfAdvocacyForMessUp(messup: MessUpCard): CardId[] {
+  const curated = messup.mitigation?.selfAdvocacy ?? [];
+  const barrier = messup.mitigation?.barrier;
+  const byBarrier = barrier
+    ? SELF_ADVOCACY.filter((c) => c.addressesBarriers?.includes(barrier)).map((c) => c.id)
+    : [];
+  return [...new Set([...curated, ...byBarrier])];
+}
 
 const INSTANCE_SEP = '__';
 

@@ -162,6 +162,8 @@ export interface SupportCard extends BaseCard {
 export interface SelfAdvocacyCard extends BaseCard {
   type: 'selfadvocacy';
   effects: Effect[];
+  /** Barrier types this card can address (Situation barriers and/or Mess-Up barriers). */
+  addressesBarriers?: string[];
   /** Teaching/flavor text. */
   teachingText?: string;
 }

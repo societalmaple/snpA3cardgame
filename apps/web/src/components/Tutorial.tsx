@@ -15,123 +15,122 @@ const STEPS: Step[] = [
   {
     title: 'Welcome to Solve It!',
     body:
-      'This game teaches a strengths-based view of neurodiversity. The key idea: people have different ways of ' +
-      'thinking and functioning, and difficulties often come from a mismatch between a person and their environment, ' +
-      'not from being less capable. You solve Situations by creating conditions in which you can thrive.',
+      'This game is about a strengths-based view of neurodiversity. People think and work in different ways, and ' +
+      'hard things often happen when a person and their surroundings do not fit together. That is not about being ' +
+      'less capable. You win by changing the conditions so you can do your best.',
     cardId: 'sit-01',
-    tip: 'Different approaches are useful in different contexts. There is no single "correct" way to learn, communicate, or regulate.',
+    tip: 'Different approaches work in different settings. There is no one "correct" way to learn, talk, or feel.',
   },
   {
     title: 'Goal',
     body:
-      `Be the first player to reach Well-Being Level ${TARGET_LEVEL}. The winning level must come from successfully ` +
-      'solving a Situation. Well-being comes from supportive environments, relationships, strategies, and ' +
-      'self-acceptance, not only from performing better.',
+      `Be the first player to reach Well-Being Level ${TARGET_LEVEL}. The level that wins must come from solving a ` +
+      'Situation. Well-being grows from supportive places, good relationships, and strategies, not just from doing better.',
   },
   {
     title: 'Choose a Character',
     body:
-      'At the start, everyone picks a unique Character. Your Character gives you a permanent passive ability that ' +
-      'reinforces the model, like gaining an alternate solution when a Situation matches your strengths, or helping ' +
-      'another player choose an environmental solution.',
+      'At the start, each player picks a unique Character. Your Character gives you a steady ability that fits the ' +
+      'game, like an extra way to solve a Situation when it matches your strengths, or helping someone else pick an ' +
+      'environmental solution.',
     cardId: 'char-01',
-    tip: 'Characters are never discarded, and each is unique, one per player.',
+    tip: 'Characters are never thrown away, and each one is used by only one player.',
   },
   {
     title: 'Your Turn',
     body:
-      'On your turn you draw a Situation, solve it, then play or equip cards in your main phase and end your turn. ' +
-      'If you draw a Mess-Up, it creates a barrier you can often remove.',
+      'On your turn you draw a Situation, try to solve it, then play or equip cards and end your turn. If you draw a ' +
+      'Mess-Up, it sets up a barrier you can usually remove.',
   },
   {
     title: 'Situations & Barriers',
     body:
-      'Every Situation has a base difficulty and one or more barriers, noise, crowding, time pressure, unclear ' +
-      'instructions, sensory overload, social pressure, and more. A barrier is NOT your fault; it is a mismatch ' +
-      'between you and the environment.',
+      'Every Situation has a base difficulty and one or more barriers, like noise, crowding, time pressure, unclear ' +
+      'instructions, too much input, or social pressure. A barrier is not your fault. It means the setting does not ' +
+      'fit you yet.',
     cardId: 'sit-02',
-    tip: 'The UI shows "your approach" and the "modified difficulty", different valid solutions, not a hidden correct answer.',
+    tip: 'The screen shows "your approach" and the "modified difficulty". These are different good ways to win, not a hidden answer.',
   },
   {
-    title: 'Multiple Valid Solutions',
+    title: 'Multiple Ways to Solve',
     body:
-      'A Situation can be solved in several ways: a relevant Strength, an active Support, a Self-Advocacy card, a ' +
-      'Friend, a Club, an environmental change, or teamwork. You are never asked to simply "try harder."',
+      'You can solve a Situation in more than one way: a matching Strength, an active Support, a Self-Advocacy card, ' +
+      'a Friend, a Club, changing the environment, or working with a teammate. You are never told to just "try harder."',
     cardId: 'sit-06',
   },
   {
     title: 'Strengths',
     body:
-      'Strengths give a modest base bonus PLUS a contextual effect, they shine when they fit the Situation. ' +
-      'Linguistic helps with explaining and writing; Logical-Mathematical with planning and sequencing; Spatial with ' +
-      'diagrams and organization; and so on. Strengths are used up when you solve a Situation.',
+      'Strengths give a small base bonus PLUS a context bonus, so they work best when they fit the Situation. ' +
+      'Linguistic helps with explaining and writing; Logical-Mathematical with planning and steps; Spatial with ' +
+      'diagrams and order; and so on. Strengths are used up when you solve a Situation.',
     cardId: 'str-01',
-    tip: 'A Strength is not universally useful, its value comes from finding the right context.',
+    tip: 'A Strength is not good everywhere. Its value comes from finding the right place for it.',
   },
   {
     title: 'Supports & Accommodations',
     body:
-      `Supports are tools, accommodations, or environmental changes that remove barriers. You can keep up to ` +
-      `${MAX_SUPPORTS} active at once. Quiet Workspace helps sensory Situations, Written Instructions helps with ` +
-      `unclear instructions, Extra Processing Time helps with time pressure. Supports are NOT "power-ups", they ` +
-      'change the conditions so existing abilities can be used.',
+      `Supports are tools, accommodations, or changes to the environment that remove barriers. You can keep up to ` +
+      `${MAX_SUPPORTS} active at once. Quiet Workspace helps with noise, Written Instructions helps with unclear ` +
+      `directions, Extra Processing Time helps with time pressure. Supports are NOT "power-ups". They change the ` +
+      'setting so the abilities you already have can be used.',
     cardId: 'sup-03',
-    tip: 'Needing a different format does not mean you understand less.',
+    tip: 'Getting information in a different way does not mean you understand less.',
   },
   {
     title: 'Self-Advocacy',
     body:
-      'Self-Advocacy cards are one-shot cards you play while facing a Situation. Asking for a support is an active ' +
-      'skill, not a failure: "Can I Have That in Writing?", "I Need More Processing Time", "Can We Change the ' +
-      'Environment?" These reduce the difficulty of matching barriers or cancel a consequence.',
+      'Self-Advocacy cards are one-shot cards you play while facing a Situation. Asking for help is a skill, not a ' +
+      'weakness: "Can I Have That in Writing?", "I Need More Processing Time", "Can We Change the Environment?" These ' +
+      'cards lower the difficulty of matching barriers or cancel a consequence.',
     cardId: 'sad-01',
-    tip: 'Self-advocacy helps others understand what you need to succeed.',
+    tip: 'Telling others what you need helps everyone help you succeed.',
   },
   {
     title: 'Friends & Clubs',
     body:
-      'Friends provide co-regulation and collaboration: the Active Listener clarifies communication, the Detail ' +
-      'Checker spots unclear requirements, the Study Partner breaks down big tasks, the Calm Anchor eases stress. ' +
-      'Clubs are supportive communities that help you find environments where your strengths are useful.',
+      'Friends help with co-regulation and teamwork: the Active Listener clears up communication, the Detail Checker ' +
+      'spots unclear requirements, the Study Partner breaks big tasks into small ones, the Calm Anchor eases stress. ' +
+      'Clubs are caring communities that help you find places where your strengths are useful.',
     cardId: 'fnd-03',
   },
   {
     title: 'Mess-Ups Are Barriers, Not Failures',
     body:
-      'When you draw a Mess-Up, the environment threw up a barrier, Sensory Overload Spot, Unexpected Routine ' +
+      'When you draw a Mess-Up, the setting threw up a barrier, like Sensory Overload Spot, Unexpected Routine ' +
       'Change, Miscommunication Glitch, Burnout, or Lost Accommodation. You can usually MITIGATE it with a Support, ' +
-      'Self-Advocacy card, Strength, or Friend. If you cannot, you only take a small temporary penalty for the next ' +
+      'Self-Advocacy card, Strength, or Friend. If you cannot, you only get a small, temporary penalty for the next ' +
       'Situation, never a permanent loss.',
     cardId: 'msu-02',
-    tip: 'Needing rest is not losing personal worth. Losing access to a support creates a barrier, the lesson is about access.',
+    tip: 'Needing rest does not lower your worth. Losing a support creates a barrier, and the lesson is about access.',
   },
   {
     title: 'Help & Teamwork',
     body:
       'During a Situation you can ask one other player for help. Their strengths and supports can also change the ' +
-      'conditions, and Experience rewards can be shared. Collaboration lets different strengths complement each other.',
+      'conditions, and Experience rewards can be shared. Working together lets different strengths add to each other.',
     cardId: 'sit-04',
   },
   {
     title: 'Discovery',
     body:
-      'When you solve a Situation through a matched Strength, Support, or Self-Advocacy approach, you may discover a ' +
-      'new approach (an extra Experience card). It is never a random "superpower" assigned to your neurotype, it is ' +
+      'When you solve a Situation using a matching Strength, Support, or Self-Advocacy approach, you may discover a ' +
+      'new approach (an extra Experience card). It is never a random "superpower" given to your neurotype. It means ' +
       '"here is one thing that worked for me."',
   },
   {
     title: 'Hand Limit & Discarding',
     body:
-      `You hold up to ${HAND_LIMIT} cards across your two hands. If you go over, you discard down, choosing what to ` +
-      'keep. If a consequence asks you to discard, you can pay from your hand or from equipped cards.',
+      `You can hold up to ${HAND_LIMIT} cards across your two hands. If you go over, you discard down and choose what ` +
+      'to keep. If a consequence asks you to discard, you can pay from your hand or from equipped cards.',
   },
   {
     title: 'You are ready!',
     body:
-      'Remember the 10 ideas: strengths and difficulties can coexist; a difficulty is not a lack of ability; changing ' +
-      'the environment can remove a barrier; accommodations give access, not unfair advantage; self-advocacy is a ' +
-      'skill; different people solve the same problem differently; and there is no single right way to function. ' +
-      'Have fun, and help each other thrive!',
+      'Keep these ideas in mind: strengths and difficulties can exist together; a difficulty is not a lack of ' +
+      'ability; changing the environment can remove a barrier; accommodations give access, not an unfair edge; ' +
+      'self-advocacy is a skill; different people solve the same problem in different ways; and there is no one ' +
+      'right way to function. Have fun, and help each other thrive!',
     tip: 'You can reopen this tutorial anytime with the "?" button.',
   },
 ];

@@ -388,6 +388,26 @@ describe('hand limit', () => {
   });
 });
 
+describe('mess-up mitigation', () => {
+  it('offers Self-Advocacy cards that logically address the Mess-Up barrier', () => {
+    let s = startedGame();
+    const cur = s.players[s.currentPlayerIndex]!;
+    const fitting = makeInstanceId('sad-03', 900); // Can We Change the Environment? addresses 'routine-change'
+    const unrelated = makeInstanceId('sad-05', 901); // I Need a Break does not address 'routine-change'
+    s = {
+      ...s,
+      activeMessUp: makeInstanceId('msu-01', 902), // Unexpected Routine Change
+      phase: 'messup',
+      players: s.players.map((p) =>
+        p.id === cur.id ? { ...p, experienceHand: [fitting, unrelated, ...p.experienceHand] } : p,
+      ),
+    };
+    const legal = getLegalActions(s, cur.id);
+    expect(legal.mitigations).toContain(fitting);
+    expect(legal.mitigations).not.toContain(unrelated);
+  });
+});
+
 describe('full auto-played game', () => {
   it('rotates turns, keeps every instance id unique, and produces a winner', () => {
     let s = createGame(

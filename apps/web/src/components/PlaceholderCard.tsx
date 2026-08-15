@@ -1,4 +1,4 @@
-import { cardOf, type CardInstanceId } from '@school-days/shared';
+import { cardOf, selfAdvocacyForMessUp, type CardInstanceId } from '@school-days/shared';
 import { TYPE_LABEL, statLine, formatEffects, teachingText } from '../cardDisplay.ts';
 import styles from './PlaceholderCard.module.css';
 
@@ -58,6 +58,9 @@ export function PlaceholderCard({ id, onClick, selected, disabled, size = 'md', 
       )}
       {card.type === 'situation' && card.validSelfAdvocacy && card.validSelfAdvocacy.length > 0 && (
         <span className={styles.connection}>Self-Advocacy: {names(card.validSelfAdvocacy)}</span>
+      )}
+      {card.type === 'messup' && card.mitigation && (
+        <span className={styles.connection}>Self-Advocacy: {names(selfAdvocacyForMessUp(card))}</span>
       )}
       {teach && <span className={styles.teach}>{teach}</span>}
     </button>

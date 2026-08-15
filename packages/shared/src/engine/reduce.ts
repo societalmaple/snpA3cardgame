@@ -1,5 +1,5 @@
 import type { CardInstanceId } from '../cards/types.ts';
-import { cardOf, defIdOf } from '../cards/index.ts';
+import { cardOf, defIdOf, selfAdvocacyForMessUp } from '../cards/index.ts';
 import { TARGET_LEVEL, HAND_LIMIT, MAX_SUPPORTS } from '../constants.ts';
 import type { Effect } from '../cards/types.ts';
 import type { GameState, PlayerId, PlayerState, Phase } from './state.ts';
@@ -97,7 +97,7 @@ function messUpMitigationOptions(state: GameState, playerId: PlayerId): CardInst
   for (const sid of p.supports) if (mit.supports.includes(defIdOf(sid))) opts.push(sid);
   for (const id of p.experienceHand) {
     const c = cardOf(id);
-    if (c?.type === 'selfadvocacy' && mit.selfAdvocacy.includes(defIdOf(id))) opts.push(id);
+    if (c?.type === 'selfadvocacy' && selfAdvocacyForMessUp(messup).includes(defIdOf(id))) opts.push(id);
   }
   for (const sid of p.strengths) if (mit.strengths.includes(defIdOf(sid))) opts.push(sid);
   if (p.friendId && mit.friends.includes(defIdOf(p.friendId))) opts.push(p.friendId);

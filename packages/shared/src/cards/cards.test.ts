@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { SITUATIONS, SUPPORTS, SELF_ADVOCACY } from './index.ts';
+import { SITUATIONS, SUPPORTS, SELF_ADVOCACY, MESSUPS, selfAdvocacyForMessUp } from './index.ts';
 
 describe('situation card data', () => {
   it('keeps every base difficulty within 1-15', () => {
@@ -38,6 +38,34 @@ describe('self-advocacy card data', () => {
     for (const s of SELF_ADVOCACY) {
       expect(s.effects.length, `${s.id} has no effects`).toBeGreaterThan(0);
       expect(s.teachingText && s.teachingText.length > 0, `${s.id} missing teaching text`).toBe(true);
+    }
+  });
+
+  it('declares the barriers each card addresses', () => {
+    for (const s of SELF_ADVOCACY) {
+      expect(s.addressesBarriers && s.addressesBarriers.length > 0, `${s.id} missing addressesBarriers`).toBe(true);
+    }
+  });
+});
+
+describe('mess-up self-advocacy connections', () => {
+  it('derives Self-Advocacy options logically from the Mess-Up barrier', () => {
+    // A card that declares the barrier is offered even when the curated list is empty.
+    const burnout = {
+      ...MESSUPS.find((m) => m.id === 'msu-04')!,
+      mitigation: { ...MESSUPS.find((m) => m.id === 'msu-04')!.mitigation!, selfAdvocacy: [] as string[] },
+    };
+    const options = selfAdvocacyForMessUp(burnout);
+    expect(options).toContain('sad-05'); // I Need a Break addresses 'burnout'
+    expect(options).not.toContain('sad-01');
+  });
+
+  it('keeps every curated self-advocacy option consistent with the logical connections', () => {
+    for (const m of MESSUPS) {
+      const derived = selfAdvocacyForMessUp(m);
+      for (const id of m.mitigation?.selfAdvocacy ?? []) {
+        expect(derived, `${m.id} curated ${id} not derivable`).toContain(id);
+      }
     }
   });
 });

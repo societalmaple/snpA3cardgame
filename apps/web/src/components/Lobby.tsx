@@ -39,7 +39,7 @@ export function Lobby() {
   if (!room || !session) {
     return (
       <div className={styles.wrap} style={cssVars}>
-        <div className={styles.overlay} />
+        {!showHelp && !showTutorial && <div className={styles.overlay} />}
         <div className={styles.paletteSelector}>
           <select
             value={palette.name}
@@ -118,7 +118,7 @@ export function Lobby() {
 
   return (
     <div className={styles.wrap} style={cssVars}>
-      <div className={styles.overlay} />
+      {!showHelp && !showTutorial && <div className={styles.overlay} />}
       <div className={styles.paletteSelector}>
         <select
           value={palette.name}

@@ -8,14 +8,6 @@
   isolation: isolate;
 }
 
-.wrap::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: var(--overlay);
-  z-index: -1;
-}
-
 .overlay {
   position: fixed;
   inset: 0;

@@ -18,7 +18,7 @@ export const MESSUPS: MessUpCard[] = [
     mitigation: {
       barrier: 'routine-change',
       supports: ['sup-05', 'sup-10'],
-      selfAdvocacy: ['sad-02'],
+      selfAdvocacy: ['sad-02', 'sad-03', 'sad-06'],
       strengths: ['str-07'],
       friends: [],
     },
@@ -50,7 +50,7 @@ export const MESSUPS: MessUpCard[] = [
     mitigation: {
       barrier: 'communication',
       supports: ['sup-07'],
-      selfAdvocacy: ['sad-04'],
+      selfAdvocacy: ['sad-04', 'sad-01'],
       strengths: ['str-01', 'str-06'],
       friends: ['fnd-01'],
     },

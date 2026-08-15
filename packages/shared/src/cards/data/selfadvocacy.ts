@@ -10,6 +10,7 @@ export const SELF_ADVOCACY: SelfAdvocacyCard[] = [
       { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['verbal-instructions', 'unclear-instructions'] },
       { type: 'CHANGE_ENVIRONMENT', removeBarriers: ['verbal-instructions'], addBarriers: ['written-information'] },
     ],
+    addressesBarriers: ['verbal-instructions', 'unclear-instructions', 'written-information', 'communication', 'lost-support'],
     teachingText: 'Needing a different format does not mean you understand less.',
   },
   {
@@ -21,6 +22,7 @@ export const SELF_ADVOCACY: SelfAdvocacyCard[] = [
       { type: 'IGNORE_BARRIER', barriers: ['time-pressure'] },
       { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['time-pressure'] },
     ],
+    addressesBarriers: ['time-pressure', 'sustained-time-pressure', 'verbal-processing', 'routine-change'],
     teachingText: 'Asking for processing time is an active skill, not a failure.',
   },
   {
@@ -32,6 +34,7 @@ export const SELF_ADVOCACY: SelfAdvocacyCard[] = [
       { type: 'CHANGE_ENVIRONMENT', removeBarriers: ['sensory', 'noise', 'crowding', 'lighting', 'physical-environment'] },
       { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['sensory', 'environment'] },
     ],
+    addressesBarriers: ['sensory', 'noise', 'crowding', 'lighting', 'physical-environment', 'environment', 'routine-change', 'lost-support'],
     teachingText: 'Self-advocacy helps others understand what you need to succeed.',
   },
   {
@@ -43,6 +46,7 @@ export const SELF_ADVOCACY: SelfAdvocacyCard[] = [
       { type: 'IGNORE_BARRIER', barriers: ['must-communicate-verbally', 'communication-format'] },
       { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['verbal-communication', 'communication-format'] },
     ],
+    addressesBarriers: ['must-communicate-verbally', 'communication-format', 'verbal-communication', 'communication', 'lost-support'],
     teachingText: 'There is more than one way to communicate understanding.',
   },
   {
@@ -53,6 +57,7 @@ export const SELF_ADVOCACY: SelfAdvocacyCard[] = [
     effects: [
       { type: 'CANCEL_CONSEQUENCE', consequenceTypes: ['LOSE_LEVEL', 'DISCARD_EXPERIENCE', 'DISCARD_SITUATION'] },
     ],
+    addressesBarriers: ['burnout', 'stress', 'anxiety', 'overload'],
     teachingText: 'Taking a break can help you return ready to participate.',
   },
   {
@@ -64,6 +69,7 @@ export const SELF_ADVOCACY: SelfAdvocacyCard[] = [
       { type: 'REVEAL_SITUATION' },
       { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['unclear-expectations', 'hidden-curriculum'] },
     ],
+    addressesBarriers: ['unclear-expectations', 'hidden-curriculum', 'unspoken-expectations', 'routine-change', 'lost-support'],
     teachingText: 'Clarifying expectations is a valid strategy, not a weakness.',
   },
 ];
