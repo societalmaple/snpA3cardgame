@@ -1,9 +1,9 @@
-# Solve It! (working title)
+# Solve It!
 
 An online, real-time **multiplayer web card game for 2–4 players**. Race to
 Well-Being **Level 15**, but the winning level must come from *solving a Situation*,
-not from a lucky card. The server is authoritative, so nobody can cheat, and each
-player only ever sees their own hand.
+not from a "go up a level" card. The server has all control, so nobody can cheat, and each
+player only sees their own hand.
 
 > Cards, names, and artwork are **placeholders**. All card content lives in editable
 > data files, so the game can be fully reskinned and rebalanced without touching the
@@ -70,7 +70,7 @@ that checks every card is conserved and a winner emerges.
 
 This game teaches a **strengths-based view of neurodiversity**: people have different
 ways of thinking and functioning, and difficulties usually come from a *mismatch
-between a person and their environment*, not from being less capable. You win by
+between a person and their environment.* It is not from being less capable, as many people tend to believe. You win by
 solving Situations through supports, self-advocacy, and community, not just by
 "trying harder". An interactive tutorial is available from the Lobby and in-game.
 
