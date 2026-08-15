@@ -1,4 +1,4 @@
-# Build Plan — "School Days" (working title)
+# Build Plan, "Solve It!" (working title)
 
 A responsive, online, multiplayer web card game for 2–4 players. Players race to
 **Well-Being Level 5**; the winning level must normally come from *solving a
@@ -12,10 +12,10 @@ Situation*. Full game design lives in [`directions.md`](./directions.md).
 
 | Topic | Decision |
 |---|---|
-| Scope | **Standalone app** — no host-site integration |
+| Scope | **Standalone app**, no host-site integration |
 | Server | Runs **locally** on the developer's machine (`localhost`) |
-| Identity | **Anonymous room codes** — no auth/login |
-| Persistence | **In-memory, in-session only** — no DB/Redis; state resets on server restart |
+| Identity | **Anonymous room codes**, no auth/login |
+| Persistence | **In-memory, in-session only**, no DB/Redis; state resets on server restart |
 | Language | **TypeScript** end-to-end (client, server, engine, card data) |
 
 ## Stack
@@ -81,14 +81,14 @@ apps/web/          React + Vite UI (lobby, board, hand, controls, event log)
 
 ## Roadmap
 
-- **Phase 0 — Scaffold:** npm workspaces, TS config, Vite, Vitest, lint.
-- **Phase 1 — Engine:** types + placeholder card data + reducer + effect interpreter
+- **Phase 0, Scaffold:** npm workspaces, TS config, Vite, Vitest, lint.
+- **Phase 1, Engine:** types + placeholder card data + reducer + effect interpreter
   + `getLegalActions`, with Vitest scenario tests. Playable via tests, no UI/network.
-- **Phase 2 — Hotseat UI:** local pass-and-play to validate rules/UX fast.
-- **Phase 3 — Server:** room codes, lobby, ready, start, authoritative engine,
+- **Phase 2, Hotseat UI:** local pass-and-play to validate rules/UX fast.
+- **Phase 3, Server:** room codes, lobby, ready, start, authoritative engine,
   message protocol.
-- **Phase 4 — Wire client↔server:** redacted views, turn sync.
-- **Phase 5 — Harden:** reconnect, illegal-move rejection, reshuffle, help
+- **Phase 4, Wire client↔server:** redacted views, turn sync.
+- **Phase 5, Harden:** reconnect, illegal-move rejection, reshuffle, help
   negotiation + reward split, win-only-via-Situation.
-- **Phase 6 — Polish & docs:** responsive layout, event log, `<PlaceholderCard>`,
+- **Phase 6, Polish & docs:** responsive layout, event log, `<PlaceholderCard>`,
   "how to add real cards" guide.

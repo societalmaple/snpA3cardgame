@@ -1,19 +1,78 @@
 import { useState } from 'react';
-import { MIN_PLAYERS, MAX_PLAYERS } from '@school-days/shared';
+import { MIN_PLAYERS, MAX_PLAYERS, PALETTES } from '@school-days/shared';
 import { useStore } from '../store.ts';
+import { HelpScreen } from './HelpScreen.tsx';
+import { Tutorial } from './Tutorial.tsx';
 import styles from './Lobby.module.css';
 
 export function Lobby() {
-  const { room, session, connected, createRoom, joinRoom, setReady, startGame, leave } = useStore();
+  const { room, session, connected, createRoom, joinRoom, setReady, startGame, leave, palette, refreshPalette, setPalette } = useStore();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  const cssVars = {
+    '--bg': palette.colors.background,
+    '--panel': palette.colors.panel,
+    '--panel-border': palette.colors.panelBorder,
+    '--primary': palette.colors.primary,
+    '--primary-text': palette.colors.primaryText,
+    '--secondary': palette.colors.secondary,
+    '--secondary-text': palette.colors.secondaryText,
+    '--ghost': palette.colors.ghost,
+    '--ghost-hover': palette.colors.ghostHover,
+    '--input-bg': palette.colors.inputBg,
+    '--input-border': palette.colors.inputBorder,
+    '--input-focus': palette.colors.inputFocus,
+    '--text-primary': palette.colors.textPrimary,
+    '--text-secondary': palette.colors.textSecondary,
+    '--text-muted': palette.colors.textMuted,
+    '--accent': palette.colors.accent,
+    '--accent-glow': palette.colors.accentGlow,
+    '--overlay': palette.colors.overlay,
+    '--player-item': palette.colors.playerItem,
+    '--player-item-border': palette.colors.playerItemBorder,
+  } as React.CSSProperties;
 
   // Not in a room yet → create / join form.
   if (!room || !session) {
     return (
-      <div className={styles.wrap}>
-        <div className={styles.panel}>
-          <h1 className={styles.title}>School Days</h1>
+      <div className={styles.wrap} style={cssVars}>
+        <div className={styles.overlay} />
+        <div className={styles.paletteSelector}>
+          <select
+            value={palette.name}
+            onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+            className={styles.paletteSelect}
+            aria-label="Select color palette"
+          >
+            {PALETTES.map((p) => (
+              <option key={p.name} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+            🎲
+          </button>
+        </div>
+        {showHelp ? (
+          <HelpScreen onClose={() => setShowHelp(false)} />
+        ) : showTutorial ? (
+          <Tutorial onClose={() => setShowTutorial(false)} />
+        ) : (
+          <>
+            <div className={styles.topRight}>
+              <button className={styles.tutorialBtn} onClick={() => setShowTutorial(true)} aria-label="Interactive tutorial" title="Interactive tutorial">
+                Tutorial
+              </button>
+              <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play" title="How to play">
+                ?
+              </button>
+            </div>
+            <div className={styles.panel}>
+          <h1 className={styles.title}>Solve It!</h1>
           <p className={styles.sub}>Online card game for {MIN_PLAYERS}–{MAX_PLAYERS} players</p>
 
           <label className={styles.label}>Your name</label>
@@ -44,8 +103,10 @@ export function Lobby() {
             </button>
           </div>
 
-          {!connected && <p className={styles.warn}>Connecting to server…</p>}
-        </div>
+{!connected && <p className={styles.warn}>Connecting to server…</p>}
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -56,8 +117,40 @@ export function Lobby() {
   const canStart = isHost && room.players.length >= MIN_PLAYERS && room.players.every((p) => p.ready);
 
   return (
-    <div className={styles.wrap}>
-      <div className={styles.panel}>
+    <div className={styles.wrap} style={cssVars}>
+      <div className={styles.overlay} />
+      <div className={styles.paletteSelector}>
+        <select
+          value={palette.name}
+          onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+          className={styles.paletteSelect}
+          aria-label="Select color palette"
+        >
+          {PALETTES.map((p) => (
+            <option key={p.name} value={p.name}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+        <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+          🎲
+        </button>
+      </div>
+      {showHelp ? (
+        <HelpScreen onClose={() => setShowHelp(false)} />
+      ) : showTutorial ? (
+        <Tutorial onClose={() => setShowTutorial(false)} />
+      ) : (
+        <>
+          <div className={styles.topRight}>
+            <button className={styles.tutorialBtn} onClick={() => setShowTutorial(true)} aria-label="Interactive tutorial" title="Interactive tutorial">
+              Tutorial
+            </button>
+            <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play" title="How to play">
+              ?
+            </button>
+          </div>
+          <div className={styles.panel}>
         <h1 className={styles.title}>Room {room.code}</h1>
         <p className={styles.sub}>Share this code so friends can join.</p>
 
@@ -90,7 +183,9 @@ export function Lobby() {
         <button className={styles.ghost} onClick={leave}>
           Leave room
         </button>
-      </div>
+        </div>
+        </>
+      )}
     </div>
   );
 }

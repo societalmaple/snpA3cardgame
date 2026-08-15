@@ -1,16 +1,20 @@
 import { useState } from 'react';
-import { HAND_LIMIT, type Action, type CardInstanceId, type PlayerView } from '@school-days/shared';
+import { HAND_LIMIT, type Action, type CardInstanceId, type PlayerView, PALETTES } from '@school-days/shared';
 import { useStore } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
 import { CharacterSelect } from './CharacterSelect.tsx';
+import { HelpScreen } from './HelpScreen.tsx';
+import { Tutorial } from './Tutorial.tsx';
 import { cardName } from '../cardDisplay.ts';
 import styles from './Game.module.css';
 
 export function Game({ view }: { view: PlayerView }) {
-  const { room, sendAction, leave } = useStore();
+  const { room, sendAction, leave, palette, refreshPalette, setPalette } = useStore();
   const { legal } = view;
   const [helpTarget, setHelpTarget] = useState('');
   const [offer, setOffer] = useState(0);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   // Character selection happens before the board is shown.
   if (view.phase === 'character_select') return <CharacterSelect view={view} />;
@@ -24,12 +28,18 @@ export function Game({ view }: { view: PlayerView }) {
   const opponents = view.players.filter((p) => p.id !== me);
   const self = view.players.find((p) => p.id === me);
   const equipped = self
-    ? [...self.strengths, ...(self.friendId ? [self.friendId] : []), ...(self.clubId ? [self.clubId] : [])]
+    ? [
+        ...self.strengths,
+        ...(self.friendId ? [self.friendId] : []),
+        ...(self.clubId ? [self.clubId] : []),
+        ...self.supports,
+      ]
     : [];
 
   const clickable = (id: CardInstanceId) =>
     legal.playableSituations.includes(id) ||
     legal.playableCards.includes(id) ||
+    legal.mitigations.includes(id) ||
     (legal.mustDiscard && legal.discardable.includes(id));
   const onCardClick = (id: CardInstanceId) => {
     if (legal.mustDiscard && legal.discardable.includes(id)) act({ type: 'DISCARD_CARD', playerId: me, cardId: id });
@@ -40,22 +50,72 @@ export function Game({ view }: { view: PlayerView }) {
   const prompt = getPrompt(view);
   const winner = view.winnerId ? nameOf(view.winnerId) : null;
 
+  const cssVars = {
+    '--bg': palette.colors.background,
+    '--panel': palette.colors.panel,
+    '--panel-border': palette.colors.panelBorder,
+    '--primary': palette.colors.primary,
+    '--primary-text': palette.colors.primaryText,
+    '--secondary': palette.colors.secondary,
+    '--secondary-text': palette.colors.secondaryText,
+    '--ghost': palette.colors.ghost,
+    '--ghost-hover': palette.colors.ghostHover,
+    '--input-bg': palette.colors.inputBg,
+    '--input-border': palette.colors.inputBorder,
+    '--input-focus': palette.colors.inputFocus,
+    '--text-primary': palette.colors.textPrimary,
+    '--text-secondary': palette.colors.textSecondary,
+    '--text-muted': palette.colors.textMuted,
+    '--accent': palette.colors.accent,
+    '--accent-glow': palette.colors.accentGlow,
+    '--overlay': palette.colors.overlay,
+    '--player-item': palette.colors.playerItem,
+    '--player-item-border': palette.colors.playerItemBorder,
+  } as React.CSSProperties;
+
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={cssVars}>
+      <div className={styles.overlay} />
       <header className={styles.topbar}>
         <div>
-          <strong>School Days</strong> · Room {room?.code} · Turn {view.turn}
+          <strong>Solve It!</strong> · Room {room?.code} · Turn {view.turn}
         </div>
         <div className={isMyTurn ? styles.myTurn : styles.turn}>
           {winner ? `${winner} wins!` : isMyTurn ? 'Your turn' : `${nameOf(view.currentPlayerId)}'s turn`}
         </div>
         <div className={styles.rightBar}>
           <span className={styles.meName}>{myName}</span>
+          <button className={styles.tutorialBtn} onClick={() => setShowTutorial(true)} aria-label="Interactive tutorial" title="Interactive tutorial">
+            Tutorial
+          </button>
+          <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play" title="How to play">
+            ?
+          </button>
           <button className={styles.leave} onClick={leave}>
             Leave
           </button>
+          <div className={styles.paletteSelector}>
+            <select
+              value={palette.name}
+              onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+              className={styles.paletteSelect}
+              aria-label="Select color palette"
+            >
+              {PALETTES.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+              🎲
+            </button>
+          </div>
         </div>
       </header>
+
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
+      {showHelp && <HelpScreen onClose={() => setShowHelp(false)} />}
 
       {winner && (
         <div className={styles.banner}>
@@ -79,6 +139,7 @@ export function Game({ view }: { view: PlayerView }) {
               <span>💪 {p.strengths.length}</span>
               <span>{p.friendId ? '🤝 1' : '🤝 0'}</span>
               <span>{p.clubId ? '🏫 1' : '🏫 0'}</span>
+              <span>🧰 {p.supports.length}</span>
             </div>
           </div>
         ))}
@@ -90,34 +151,100 @@ export function Game({ view }: { view: PlayerView }) {
 
           {view.activeSituation && (
             <div className={styles.combat}>
-              <PlaceholderCard id={view.activeSituation.cardId} />
+              <PlaceholderCard id={view.activeSituation.cardId} animated />
               {view.activeSituation.math && (
                 <div className={styles.math}>
+                  <div className={styles.mathRow}>
+                    <span>Base difficulty</span>
+                    <strong>{view.activeSituation.math.baseDifficulty}</strong>
+                  </div>
+                  {view.activeSituation.math.tempPenalty > 0 && (
+                    <div className={styles.mathRow}>
+                      <span>Temporary penalty</span>
+                      <strong>+{view.activeSituation.math.tempPenalty}</strong>
+                    </div>
+                  )}
+                  {view.activeSituation.math.reductions.map((r, i) => (
+                    <div className={styles.mathRow} key={i}>
+                      <span className={styles.approach}>
+                        {r.amount < 0 ? '−' : '+'}
+                        {Math.abs(r.amount)} · {r.label}
+                      </span>
+                      <strong>{r.amount < 0 ? '−' : '+'}
+                        {Math.abs(r.amount)}</strong>
+                    </div>
+                  ))}
+                  <div className={styles.mathRow}>
+                    <span>Modified difficulty</span>
+                    <strong>{view.activeSituation.math.difficulty}</strong>
+                  </div>
                   <div className={styles.mathRow}>
                     <span>Your total</span>
                     <strong>{view.activeSituation.math.total}</strong>
                   </div>
+                  {view.activeSituation.math.teamBonus > 0 && (
+                    <div className={styles.mathRow}>
+                      <span>Team bonus</span>
+                      <strong>+{view.activeSituation.math.teamBonus}</strong>
+                    </div>
+                  )}
                   {view.activeSituation.helperId && (
                     <div className={styles.mathRow}>
                       <span>incl. {nameOf(view.activeSituation.helperId)}</span>
                       <span>+{view.activeSituation.math.helperPower}</span>
                     </div>
                   )}
-                  <div className={styles.mathRow}>
-                    <span>Difficulty</span>
-                    <strong>{view.activeSituation.math.difficulty}</strong>
-                  </div>
                   <div className={view.activeSituation.math.wins ? styles.willWin : styles.willLose}>
-                    {view.activeSituation.math.wins ? 'Winning' : 'Not enough yet'}
+                    {view.activeSituation.math.wins ? 'Winning! Resolve!' : 'Not enough yet'}
+                  </div>
+                  <div className={styles.altNote}>
+                    {view.activeSituation.math.reductions.length > 0 && (
+                      <span>✓ Using {view.activeSituation.math.reductions.length} valid approach(es).</span>
+                    )}
+                    {view.activeSituation.math.reductions.some((r) => r.kind !== 'strength') && (
+                      <span>Change the conditions, not just power.</span>
+                    )}
                   </div>
                 </div>
               )}
             </div>
           )}
 
+          {view.activeMessUp && (
+            <div className={styles.combat}>
+              <PlaceholderCard id={view.activeMessUp} animated />
+              <div className={styles.messupPanel}>
+                {legal.mitigations.length > 0 && (
+                  <>
+                    <strong>Choose how to remove this barrier:</strong>
+                    <div className={styles.controls}>
+                      {legal.mitigations.map((id) => (
+                        <button
+                          key={id}
+                          className={styles.secondary}
+                          onClick={() => act({ type: 'RESOLVE_MESS_UP', playerId: me, cardId: id })}
+                        >
+                          Use {cardName(id)}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {legal.canAcceptMessUp && (
+                  <button
+                    className={styles.secondary}
+                    onClick={() => act({ type: 'RESOLVE_MESS_UP', playerId: me, cardId: null })}
+                  >
+                    Endure a temporary penalty
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {view.pendingHelp && (
             <p className={styles.pending}>
-              {nameOf(view.pendingHelp.requesterId)} asked {nameOf(view.pendingHelp.helperId)} for help — offering{' '}
+              {nameOf(view.pendingHelp.requesterId)} asked {nameOf(view.pendingHelp.helperId)} for help, offering{' '}
               {view.pendingHelp.offeredExperience} Experience.
             </p>
           )}
@@ -126,7 +253,7 @@ export function Game({ view }: { view: PlayerView }) {
           <div className={styles.controls}>
             {legal.canDraw && (
               <button className={styles.primary} onClick={() => act({ type: 'DRAW_SITUATION', playerId: me })}>
-                Draw Situation ({view.situationDeckCount})
+                Draw Situation
               </button>
             )}
             {legal.canResolveCombat && (
@@ -180,7 +307,7 @@ export function Game({ view }: { view: PlayerView }) {
         <aside className={styles.log}>
           <h3>Game log</h3>
           <ul>
-            {view.log.slice(-40).map((e) => (
+            {view.log.slice(-5).map((e) => (
               <li key={e.id}>{e.message}</li>
             ))}
           </ul>
@@ -213,6 +340,7 @@ export function Game({ view }: { view: PlayerView }) {
                 key={id}
                 id={id}
                 size="sm"
+                animated
                 onClick={
                   legal.mustDiscard && legal.discardable.includes(id)
                     ? () => act({ type: 'DISCARD_CARD', playerId: me, cardId: id })
@@ -255,20 +383,27 @@ function getPrompt(view: PlayerView): string {
   if (view.winnerId) return 'Game over.';
   if (view.legal.mustDiscard) {
     if (view.discardTask?.kind === 'count') {
-      return `You failed — discard ${view.discardTask.remaining} card(s). You may discard from your hand or your equipped cards.`;
+      return `You didn't fully succeed. Discard ${view.discardTask.remaining} card(s). You may discard from your hand or your equipped cards.`;
     }
-    return `Your hand is over ${HAND_LIMIT} — discard a card (toss the new one, or an old one to keep it).`;
+    return `Your hand is over ${HAND_LIMIT}. Discard a card (toss the new one, or an old one to keep it).`;
   }
   const isMyTurn = view.currentPlayerId === view.you;
-  if (view.phase === 'await_help') {
-    return view.legal.canRespondToHelp ? "You've been asked to help — accept or decline." : 'Waiting for the helper to respond…';
+  const isHelper = view.activeSituation?.helperId === view.you;
+  if (view.phase === 'messup') {
+    return view.legal.canAcceptMessUp
+      ? 'A Mess-Up created a barrier. Use a Support, Self-Advocacy, Strength, or Friend to remove it, or endure a temporary penalty.'
+      : 'No mitigation available, enduring the temporary penalty.';
   }
-  if (!isMyTurn) return `Waiting for ${view.players.find((p) => p.id === view.currentPlayerId)?.name ?? 'the current player'}…`;
+  if (view.phase === 'await_help') {
+    return view.legal.canRespondToHelp ? "You've been asked to help. Accept or decline." : 'Waiting for the helper to respond…';
+  }
+  if (!isMyTurn && !isHelper) return `Waiting for ${view.players.find((p) => p.id === view.currentPlayerId)?.name ?? 'the current player'}…`;
+  if (isHelper && view.phase === 'combat') return 'You are helping! Equip cards to boost the team, then the active player will Resolve.';
   switch (view.phase) {
     case 'await_action':
       return 'Draw a Situation, or play a Situation from your hand.';
     case 'combat':
-      return 'Play cards to boost your total, ask for help, then Resolve.';
+      return 'Use your strengths, supports, friends, clubs, or self-advocacy to change the conditions, then Resolve.';
     case 'main':
       return 'Play or equip cards, then End your turn.';
     default:

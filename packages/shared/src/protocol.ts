@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// NETWORK PROTOCOL — the typed contract between the Socket.IO server and clients.
+// NETWORK PROTOCOL, the typed contract between the Socket.IO server and clients.
 // Shared so both ends agree on event names and payload shapes.
 // ─────────────────────────────────────────────────────────────────────────────
 

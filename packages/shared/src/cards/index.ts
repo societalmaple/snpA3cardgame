@@ -6,9 +6,11 @@ import { LEVELUPS } from './data/levelups.ts';
 import { STRENGTHS } from './data/strengths.ts';
 import { FRIENDS } from './data/friends.ts';
 import { CHARACTERS } from './data/characters.ts';
+import { SUPPORTS } from './data/supports.ts';
+import { SELF_ADVOCACY } from './data/selfadvocacy.ts';
 
 export * from './types.ts';
-export { SITUATIONS, MESSUPS, CLUBS, LEVELUPS, STRENGTHS, FRIENDS, CHARACTERS };
+export { SITUATIONS, MESSUPS, CLUBS, LEVELUPS, STRENGTHS, FRIENDS, CHARACTERS, SUPPORTS, SELF_ADVOCACY };
 
 /** Every card definition, flat. */
 export const ALL_CARDS: Card[] = [
@@ -19,6 +21,8 @@ export const ALL_CARDS: Card[] = [
   ...STRENGTHS,
   ...FRIENDS,
   ...CHARACTERS,
+  ...SUPPORTS,
+  ...SELF_ADVOCACY,
 ];
 
 /** Lookup table by definition id. */
@@ -38,13 +42,15 @@ export interface DeckEntry {
 export const SITUATION_DECK_RECIPE: DeckEntry[] = [
   ...SITUATIONS.map((c) => ({ defId: c.id, copies: 1 })),
   ...MESSUPS.map((c) => ({ defId: c.id, copies: 2 })),
-  ...CLUBS.map((c) => ({ defId: c.id, copies: 1 })),
   ...LEVELUPS.map((c) => ({ defId: c.id, copies: 1 })),
 ];
 
 export const EXPERIENCE_DECK_RECIPE: DeckEntry[] = [
   ...STRENGTHS.map((c) => ({ defId: c.id, copies: 3 })),
   ...FRIENDS.map((c) => ({ defId: c.id, copies: 2 })),
+  ...SUPPORTS.map((c) => ({ defId: c.id, copies: 2 })),
+  ...SELF_ADVOCACY.map((c) => ({ defId: c.id, copies: 2 })),
+  ...CLUBS.map((c) => ({ defId: c.id, copies: 1 })),
 ];
 
 /** Character definition ids (dealt one per player, not shuffled into a deck). */

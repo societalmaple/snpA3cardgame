@@ -15,7 +15,7 @@ body,
 }
 
 body {
-  background: radial-gradient(1200px 800px at 50% -10%, #1c2233, #0b0e16);
+  background: transparent;
   color: #e7e9f3;
 }
 

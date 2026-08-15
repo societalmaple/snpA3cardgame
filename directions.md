@@ -1,4 +1,4 @@
-# **School Days(please change this name i just cant think of anything else)**
+# **Solve It!**
 
 ## **Goal of the Game**
 

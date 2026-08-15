@@ -1,16 +1,64 @@
-import { cardOf, type PlayerView } from '@school-days/shared';
+import { useState } from 'react';
+import { cardOf, type PlayerView, PALETTES } from '@school-days/shared';
 import { useStore } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
+import { HelpScreen } from './HelpScreen.tsx';
 import styles from './CharacterSelect.module.css';
 
 export function CharacterSelect({ view }: { view: PlayerView }) {
-  const { sendAction } = useStore();
+  const { sendAction, palette, refreshPalette, setPalette } = useStore();
+  const [showHelp, setShowHelp] = useState(false);
   const me = view.you;
   const self = view.players.find((p) => p.id === me);
   const chosen = self?.characterId ?? null;
 
+  const cssVars = {
+    '--bg': palette.colors.background,
+    '--panel': palette.colors.panel,
+    '--panel-border': palette.colors.panelBorder,
+    '--primary': palette.colors.primary,
+    '--primary-text': palette.colors.primaryText,
+    '--secondary': palette.colors.secondary,
+    '--secondary-text': palette.colors.secondaryText,
+    '--ghost': palette.colors.ghost,
+    '--ghost-hover': palette.colors.ghostHover,
+    '--input-bg': palette.colors.inputBg,
+    '--input-border': palette.colors.inputBorder,
+    '--input-focus': palette.colors.inputFocus,
+    '--text-primary': palette.colors.textPrimary,
+    '--text-secondary': palette.colors.textSecondary,
+    '--text-muted': palette.colors.textMuted,
+    '--accent': palette.colors.accent,
+    '--accent-glow': palette.colors.accentGlow,
+    '--overlay': palette.colors.overlay,
+    '--player-item': palette.colors.playerItem,
+    '--player-item-border': palette.colors.playerItemBorder,
+  } as React.CSSProperties;
+
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} style={cssVars}>
+      <div className={styles.overlay} />
+      <div className={styles.paletteSelector}>
+        <select
+          value={palette.name}
+          onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+          className={styles.paletteSelect}
+          aria-label="Select color palette"
+        >
+          {PALETTES.map((p) => (
+            <option key={p.name} value={p.name}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+        <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+          🎲
+        </button>
+      </div>
+      {showHelp && <HelpScreen onClose={() => setShowHelp(false)} />}
+      <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play">
+        ?
+      </button>
       <div className={styles.panel}>
         <h1 className={styles.title}>Choose your character</h1>
         <p className={styles.sub}>

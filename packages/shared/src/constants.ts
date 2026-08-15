@@ -1,7 +1,7 @@
 // Core game constants. Tweak these to rebalance the game without touching logic.
 
 /** Working title of the game (see directions.md). */
-export const GAME_NAME = 'School Days';
+export const GAME_NAME = 'Solve It!';
 
 /** Well-Being level a player must reach to win. */
 export const TARGET_LEVEL = 15;
@@ -14,7 +14,7 @@ export const STARTING_EXPERIENCE = 4;
 
 /**
  * Maximum cards a player may hold across both hands (Situation + Experience). When a
- * draw pushes a player over this, they must discard down — choosing what to keep.
+ * draw pushes a player over this, they must discard down, choosing what to keep.
  */
 export const HAND_LIMIT = 6;
 
@@ -22,6 +22,9 @@ export const HAND_LIMIT = 6;
 export const MIN_PLAYERS = 2;
 export const MAX_PLAYERS = 4;
 
-/** Default equip limits (see directions.md — Strengths are unlimited). */
+/** Default equip limits (see directions.md, Strengths are unlimited). */
 export const MAX_FRIENDS = 1;
 export const MAX_CLUBS = 1;
+
+/** Active Support/Accommodation limit per player (spec: up to 2). */
+export const MAX_SUPPORTS = 2;

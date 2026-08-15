@@ -1,19 +1,112 @@
 import type { StrengthCard } from '../types.ts';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// STRENGTH CARDS (Experience deck) — 8 placeholders, one per Gardner Multiple
-// Intelligence. Equipped for a permanent combat `bonus` (unlimited strengths).
-// TO EDIT: change names/art, `bonus`, `rank`. The `intelligence` labels are the
-// eight Multiple Intelligences per directions.md.
-// ─────────────────────────────────────────────────────────────────────────────
-
 export const STRENGTHS: StrengthCard[] = [
-  { id: 'str-01', type: 'strength', name: 'Linguistic', art: 'STRENGTH 01', intelligence: 'Linguistic', rank: 1, bonus: 1 },
-  { id: 'str-02', type: 'strength', name: 'Logical-Mathematical', art: 'STRENGTH 02', intelligence: 'Logical-Mathematical', rank: 1, bonus: 2 },
-  { id: 'str-03', type: 'strength', name: 'Spatial', art: 'STRENGTH 03', intelligence: 'Spatial', rank: 2, bonus: 2 },
-  { id: 'str-04', type: 'strength', name: 'Bodily-Kinesthetic', art: 'STRENGTH 04', intelligence: 'Bodily-Kinesthetic', rank: 2, bonus: 3 },
-  { id: 'str-05', type: 'strength', name: 'Musical', art: 'STRENGTH 05', intelligence: 'Musical', rank: 1, bonus: 1 },
-  { id: 'str-06', type: 'strength', name: 'Interpersonal', art: 'STRENGTH 06', intelligence: 'Interpersonal', rank: 2, bonus: 3 },
-  { id: 'str-07', type: 'strength', name: 'Intrapersonal', art: 'STRENGTH 07', intelligence: 'Intrapersonal', rank: 3, bonus: 4 },
-  { id: 'str-08', type: 'strength', name: 'Naturalistic', art: 'STRENGTH 08', intelligence: 'Naturalistic', rank: 3, bonus: 5 },
+  {
+    id: 'str-01',
+    type: 'strength',
+    name: 'Linguistic Intelligence',
+    art: 'LINGUISTIC INTELLIGENCE',
+    intelligence: 'Linguistic',
+    rank: 1,
+    bonus: 1,
+    addressesBarriers: ['verbal-communication', 'unclear-instructions', 'written-expression', 'reading', 'reframing'],
+    contextualEffects: [
+      { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['verbal-communication', 'unclear-instructions', 'written-expression', 'reading', 'reframing'] },
+    ],
+  },
+  {
+    id: 'str-02',
+    type: 'strength',
+    name: 'Logical-Mathematical Intelligence',
+    art: 'LOGICAL-MATHEMATICAL INTELLIGENCE',
+    intelligence: 'Logical-Mathematical',
+    rank: 1,
+    bonus: 1,
+    addressesBarriers: ['planning', 'sequencing', 'rules', 'calculations', 'identifying-relationships', 'executive-function'],
+    contextualEffects: [
+      { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['planning', 'sequencing', 'rules', 'calculations', 'identifying-relationships', 'executive-function'] },
+    ],
+  },
+  {
+    id: 'str-03',
+    type: 'strength',
+    name: 'Spatial Intelligence',
+    art: 'SPATIAL INTELLIGENCE',
+    intelligence: 'Spatial',
+    rank: 1,
+    bonus: 1,
+    addressesBarriers: ['physical-space', 'organization', 'diagrams', 'navigation', 'visual-structure'],
+    contextualEffects: [
+      { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['physical-space', 'organization', 'diagrams', 'navigation', 'visual-structure'] },
+    ],
+  },
+  {
+    id: 'str-04',
+    type: 'strength',
+    name: 'Musical Intelligence',
+    art: 'MUSICAL INTELLIGENCE',
+    intelligence: 'Musical',
+    rank: 1,
+    bonus: 1,
+    addressesBarriers: ['rhythm', 'timing', 'emotional-regulation', 'patterned-information', 'sensory-regulation'],
+    contextualEffects: [
+      { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['rhythm', 'timing', 'emotional-regulation', 'patterned-information', 'sensory-regulation'] },
+    ],
+  },
+  {
+    id: 'str-05',
+    type: 'strength',
+    name: 'Bodily-Kinesthetic Intelligence',
+    art: 'BODILY-KINESTHETIC INTELLIGENCE',
+    intelligence: 'Bodily-Kinesthetic',
+    rank: 1,
+    bonus: 1,
+    addressesBarriers: ['movement', 'physical-regulation', 'hands-on-problem-solving', 'sensory-regulation'],
+    contextualEffects: [
+      { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['movement', 'physical-regulation', 'hands-on-problem-solving', 'sensory-regulation'] },
+      { type: 'GRANT_SUPPORT_BONUS', amount: 2, condition: 'movement-break' },
+    ],
+  },
+  {
+    id: 'str-06',
+    type: 'strength',
+    name: 'Interpersonal Intelligence',
+    art: 'INTERPERSONAL INTELLIGENCE',
+    intelligence: 'Interpersonal',
+    rank: 1,
+    bonus: 1,
+    addressesBarriers: ['coordination', 'communication-mismatch', 'social-pressure', 'collaboration'],
+    contextualEffects: [
+      { type: 'GRANT_TEAM_SUPPORT', amount: 2 },
+      { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['coordination', 'communication-mismatch', 'social-pressure', 'collaboration'] },
+    ],
+  },
+  {
+    id: 'str-07',
+    type: 'strength',
+    name: 'Intrapersonal Intelligence',
+    art: 'INTRAPERSONAL INTELLIGENCE',
+    intelligence: 'Intrapersonal',
+    rank: 1,
+    bonus: 1,
+    addressesBarriers: ['self-knowledge', 'emotional-regulation', 'stress-awareness', 'personal-strategy'],
+    contextualEffects: [
+      { type: 'ENABLE_ALTERNATIVE_SOLUTION', solutionType: 'self-knowledge', description: 'Identify one approach or support that fits the current Situation' },
+      { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['uncertainty', 'anxiety', 'anticipation', 'internal-pressure'] },
+    ],
+  },
+  {
+    id: 'str-08',
+    type: 'strength',
+    name: 'Naturalist Intelligence',
+    art: 'NATURALIST INTELLIGENCE',
+    intelligence: 'Naturalistic',
+    rank: 1,
+    bonus: 1,
+    addressesBarriers: ['sensory-regulation', 'environment', 'outdoor-settings', 'grounding', 'nature'],
+    contextualEffects: [
+      { type: 'MODIFY_DIFFICULTY', amount: -2, barriers: ['sensory-regulation', 'environment', 'outdoor-settings', 'grounding', 'nature'] },
+      { type: 'CHANGE_ENVIRONMENT', removeBarriers: ['sensory-overload', 'artificial-environment'] },
+    ],
+  },
 ];

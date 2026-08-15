@@ -1,7 +1,7 @@
-# School Days (working title)
+# Solve It! (working title)
 
 An online, real-time **multiplayer web card game for 2–4 players**. Race to
-Well-Being **Level 15** — but the winning level must come from *solving a Situation*,
+Well-Being **Level 15**, but the winning level must come from *solving a Situation*,
 not from a lucky card. The server is authoritative, so nobody can cheat, and each
 player only ever sees their own hand.
 
@@ -38,7 +38,7 @@ the repo root.
 3. **Open the game:** go to <http://localhost:5173>, enter a name, and
    **Create a room**.
 
-4. **Add players:** share the 4-letter room code — others **Join** with it. To test
+4. **Add players:** share the 4-letter room code, others **Join** with it. To test
    by yourself, open a second browser tab/window and join with the same code.
 
 5. **Play:** everyone clicks **Ready**, then the host clicks **Start**.
@@ -79,7 +79,7 @@ hand**:
   bonuses (**your Level does not count**). If your total is **greater than or equal
   to** the Situation's difficulty you win: gain levels and Experience cards.
   Otherwise you suffer its consequences (**listed on the card**). If a consequence
-  makes you discard cards, you choose which to lose — you may even discard equipped
+  makes you discard cards, you choose which to lose, you may even discard equipped
   cards.
 - **Mess-Up** → resolves immediately (something bad happens).
 - **Club / Go-Up-A-Level** → goes into your hand to play later.
@@ -93,25 +93,25 @@ this turn, you draw one Experience card instead ("gain problem-solving ability")
 a Situation are used up and discarded (Friends and Clubs stay). You can also
 **unequip** any equipped card during your turn to return it to your hand.
 
-**First to Level 15 wins — but only if that final level came from solving a
+**First to Level 15 wins, but only if that final level came from solving a
 Situation.** Go-Up-A-Level cards can carry you to Level 14 but never win the game.
 
 You can hold at most **6 cards** across your hands. If a card you draw or earn puts
-you over the limit, you must discard down to 6 — you choose what to keep, so you can
+you over the limit, you must discard down to 6, you choose what to keep, so you can
 toss the new card or an older one.
 
 ## Features
 
 - Pre-game character selection (each Character is unique per game).
 - Authoritative server with a pure, deterministic (seeded) game engine.
-- Per-player state redaction — you see your hands; opponents show public info +
+- Per-player state redaction, you see your hands; opponents show public info +
   card *counts* only.
 - Anonymous 4-letter room codes; lobby → ready → start.
 - Reconnect after a refresh/drop via a saved session token (while the server is up).
 - Illegal moves are rejected server-side; the UI only offers legal actions.
 - 6-card hand limit with a choose-what-to-keep discard step when you go over.
 - Equip/unequip cards; Strengths are consumed when you solve a Situation.
-- Data-driven cards — no per-card code.
+- Data-driven cards, no per-card code.
 
 ## Project layout
 
@@ -131,13 +131,13 @@ npm run build        # build buildable workspaces (web)
 ```
 
 See [`CLAUDE.md`](./CLAUDE.md) for the full command list and architecture. To add or
-rebalance cards, edit the data files only — see
+rebalance cards, edit the data files only, see
 [`docs/adding-cards.md`](./docs/adding-cards.md).
 
 ## Status
 
 - Playable end-to-end; engine and server logic are covered by tests.
-- Persistence is **in-memory only** — state resets when the server restarts (by
+- Persistence is **in-memory only**, state resets when the server restarts (by
   design for now).
 - If the current player disconnects mid-turn the turn doesn't auto-skip; they can
   reconnect to resume.

@@ -4,9 +4,9 @@ import { getLegalActions, type LegalActions } from './reduce.ts';
 import { combatMath, type CombatMath } from './bonuses.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// REDACTION — the server holds the full GameState but sends each player only a
+// REDACTION, the server holds the full GameState but sends each player only a
 // PlayerView: their own hands in full, everyone else reduced to public info +
-// hand *counts*, and decks reduced to counts (so draws can't be predicted).
+// hand *counts*. No deck tracking anymore (infinite random draws).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface PublicPlayer {
@@ -18,6 +18,7 @@ export interface PublicPlayer {
   strengths: CardInstanceId[];
   friendId: CardInstanceId | null;
   clubId: CardInstanceId | null;
+  supports: CardInstanceId[];
   situationHandCount: number;
   experienceHandCount: number;
 }
@@ -38,15 +39,10 @@ export interface PlayerView {
   yourSituationHand: CardInstanceId[];
   yourExperienceHand: CardInstanceId[];
   activeSituation: ActiveSituationView | null;
+  activeMessUp: CardInstanceId | null;
   pendingHelp: PendingHelp | null;
   discardTask: DiscardTask | null; // what the current player must discard, if anything
   availableCharacters: CardInstanceId[]; // pickable during character select
-  situationDeckCount: number;
-  experienceDeckCount: number;
-  situationDiscardCount: number;
-  experienceDiscardCount: number;
-  situationDiscardTop: CardInstanceId | null;
-  experienceDiscardTop: CardInstanceId | null;
   log: GameEvent[];
   legal: LegalActions;
 }
@@ -64,6 +60,7 @@ export function redactFor(state: GameState, playerId: PlayerId): PlayerView {
     strengths: p.strengths,
     friendId: p.friendId,
     clubId: p.clubId,
+    supports: p.supports,
     situationHandCount: p.situationHand.length,
     experienceHandCount: p.experienceHand.length,
   }));
@@ -82,15 +79,10 @@ export function redactFor(state: GameState, playerId: PlayerId): PlayerView {
     yourSituationHand: you ? you.situationHand : [],
     yourExperienceHand: you ? you.experienceHand : [],
     activeSituation,
+    activeMessUp: state.activeMessUp,
     pendingHelp: state.pendingHelp,
     discardTask: state.discardTask,
     availableCharacters: state.availableCharacters,
-    situationDeckCount: state.situationDeck.length,
-    experienceDeckCount: state.experienceDeck.length,
-    situationDiscardCount: state.situationDiscard.length,
-    experienceDiscardCount: state.experienceDiscard.length,
-    situationDiscardTop: state.situationDiscard[state.situationDiscard.length - 1] ?? null,
-    experienceDiscardTop: state.experienceDiscard[state.experienceDiscard.length - 1] ?? null,
     log: state.log,
     legal: getLegalActions(state, playerId),
   };

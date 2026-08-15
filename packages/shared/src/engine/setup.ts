@@ -1,33 +1,24 @@
 import { MIN_PLAYERS, MAX_PLAYERS, STARTING_LEVEL, STARTING_EXPERIENCE } from '../constants.ts';
-import {
-  SITUATION_DECK_RECIPE,
-  EXPERIENCE_DECK_RECIPE,
-  CHARACTER_DEFS,
-  makeInstanceId,
-  type DeckEntry,
-} from '../cards/index.ts';
+import { CHARACTER_DEFS, makeInstanceId } from '../cards/index.ts';
 import type { CardInstanceId } from '../cards/types.ts';
 import type { GameState, PlayerState } from './state.ts';
-import { shuffle } from './rng.ts';
+import { nextInt } from './rng.ts';
+import { EXPERIENCE_DEFS } from './deck.ts';
 
 export interface PlayerSeed {
   id: string;
   name: string;
 }
 
-/** Expand a deck recipe into concrete card instance ids. */
-function expandRecipe(
-  recipe: readonly DeckEntry[],
-  counterStart: number,
-): { instances: CardInstanceId[]; counter: number } {
-  const instances: CardInstanceId[] = [];
-  let counter = counterStart;
-  for (const entry of recipe) {
-    for (let i = 0; i < entry.copies; i++) {
-      instances.push(makeInstanceId(entry.defId, counter++));
-    }
-  }
-  return { instances, counter };
+/** Pick a random definition and create a new instance id. */
+function drawRandomDef(
+  defs: { id: string }[],
+  rngState: number,
+  counter: number,
+): { cardId: CardInstanceId; rngState: number; counter: number } {
+  const r = nextInt(rngState, defs.length);
+  const def = defs[r.value]!;
+  return { cardId: makeInstanceId(def.id, counter), rngState: r.state, counter: counter + 1 };
 }
 
 /**
@@ -43,22 +34,11 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
   }
 
   let counter = 0;
-  const sit = expandRecipe(SITUATION_DECK_RECIPE, counter);
-  counter = sit.counter;
-  const exp = expandRecipe(EXPERIENCE_DECK_RECIPE, counter);
-  counter = exp.counter;
   const charInstances = CHARACTER_DEFS.map((defId) => makeInstanceId(defId, counter++));
 
   let rngState = seed | 0;
-  const shuffledSit = shuffle(sit.instances, rngState);
-  rngState = shuffledSit.state;
-  const shuffledExp = shuffle(exp.instances, rngState);
-  rngState = shuffledExp.state;
 
-  const situationDeck = shuffledSit.items;
-  const experienceDeck = shuffledExp.items;
-
-  // Characters are not dealt — players pick during the character-select phase.
+  // Characters are not dealt, players pick during the character-select phase.
   const players: PlayerState[] = playerSeeds.map((ps) => ({
     id: ps.id,
     name: ps.name,
@@ -70,13 +50,17 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
     strengths: [],
     friendId: null,
     clubId: null,
+    supports: [],
+    pendingPenalty: 0,
   }));
 
-  // Deal starting Experience cards round-robin from the top of the deck.
+  // Deal starting Experience cards randomly.
   for (let i = 0; i < STARTING_EXPERIENCE; i++) {
     for (const p of players) {
-      const card = experienceDeck.pop();
-      if (card) p.experienceHand.push(card);
+      const { cardId, rngState: newRng, counter: newCounter } = drawRandomDef(EXPERIENCE_DEFS, rngState, counter);
+      rngState = newRng;
+      counter = newCounter;
+      p.experienceHand.push(cardId);
     }
   }
 
@@ -85,12 +69,9 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
     players,
     currentPlayerIndex: 0,
     turn: 1,
-    situationDeck,
-    situationDiscard: [],
-    experienceDeck,
-    experienceDiscard: [],
     availableCharacters: charInstances,
     activeSituation: null,
+    activeMessUp: null,
     pendingHelp: null,
     resumeAfterDiscard: null,
     discardTask: null,

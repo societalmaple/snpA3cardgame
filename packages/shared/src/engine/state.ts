@@ -1,4 +1,5 @@
 import type { CardInstanceId } from '../cards/types.ts';
+import type { Effect } from '../cards/types.ts';
 
 export type PlayerId = string;
 
@@ -10,6 +11,7 @@ export type Phase =
   | 'character_select' // everyone picks a Character before play begins
   | 'await_action' // current player must draw or play a Situation from hand
   | 'combat' // a Situation is active; play cards / ask help / resolve
+  | 'messup' // a Mess-Up was drawn; the player may mitigate it or accept a small temporary penalty
   | 'await_help' // waiting for the chosen helper to accept/decline
   | 'discard' // current player is over the hand limit and must discard down
   | 'main' // post-draw/post-combat: play cards, then end turn
@@ -31,11 +33,15 @@ export interface PlayerState {
   connected: boolean;
   /** Private, held cards, split per spec into the two "hands". */
   situationHand: CardInstanceId[]; // situations, clubs, levelups held
-  experienceHand: CardInstanceId[]; // strengths, friends held
+  experienceHand: CardInstanceId[]; // strengths, friends, supports, self-advocacy held
   /** Equipped (public) cards contributing bonuses. */
   strengths: CardInstanceId[];
   friendId: CardInstanceId | null;
   clubId: CardInstanceId | null;
+  /** Active Supports/Accommodations (max MAX_SUPPORTS), tools that remove barriers. */
+  supports: CardInstanceId[];
+  /** Temporary difficulty penalty from an unmitigated Mess-Up; applied to the next Situation. */
+  pendingPenalty: number;
 }
 
 /** The Situation currently being fought, plus any accepted help. */
@@ -45,6 +51,12 @@ export interface ActiveSituation {
   fromDeck: boolean;
   helperId: PlayerId | null;
   helperOfferedExperience: number;
+  /** One-shot Self-Advocacy cards played during this combat. */
+  selfAdvocacyPlayed?: CardInstanceId[];
+  /** Consequence types cancelled during this combat (e.g. LOSE_LEVEL). */
+  cancelledConsequences?: Effect['type'][];
+  /** Temporary difficulty penalty carried over from an unmitigated Mess-Up. */
+  tempPenalty?: number;
 }
 
 export interface PendingHelp {
@@ -69,14 +81,12 @@ export interface GameState {
   currentPlayerIndex: number;
   turn: number;
 
-  situationDeck: CardInstanceId[]; // draw from the end (top)
-  situationDiscard: CardInstanceId[];
-  experienceDeck: CardInstanceId[];
-  experienceDiscard: CardInstanceId[];
   /** Characters not yet picked during the character-select phase. */
   availableCharacters: CardInstanceId[];
 
   activeSituation: ActiveSituation | null;
+  /** Mess-Up currently awaiting mitigation (the `messup` phase). */
+  activeMessUp: CardInstanceId | null;
   pendingHelp: PendingHelp | null;
   /** Phase to return to once the current player has finished discarding. */
   resumeAfterDiscard: Phase | null;

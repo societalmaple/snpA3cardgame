@@ -13,9 +13,9 @@ cards without touching the game engine.
 | `messups.ts` | Mess-Ups (resolve immediately when drawn) | Situation |
 | `clubs.ts` | Clubs (equipped bonus) | Situation |
 | `levelups.ts` | Go-Up-A-Level (instant, non-winning level) | Situation |
-| `strengths.ts` | Strengths — Gardner's intelligences (equipped bonus) | Experience |
+| `strengths.ts` | Strengths, Gardner's intelligences (equipped bonus) | Experience |
 | `friends.ts` | Friends (equipped bonus) | Experience |
-| `characters.ts` | Characters (one per player, never discarded) | — |
+| `characters.ts` | Characters (one per player, never discarded) | N/A |
 
 Each file is a plain typed array. Field meanings are in
 `packages/shared/src/cards/types.ts`.
@@ -28,12 +28,12 @@ Change any field in place. Examples:
 - Rebalance a Strength: edit `bonus` / `rank`.
 - Change what a Mess-Up does: edit its `effects` array (see Effects below).
 
-Keep each card's `id` stable if you can — ids are how instances are tracked.
+Keep each card's `id` stable if you can, ids are how instances are tracked.
 
 ## Adding a card
 
 Append a new object to the relevant array with a **new unique `id`**
-(e.g. `sit-21`). That's it — it's automatically included in `CARD_DB` and the deck.
+(e.g. `sit-21`). That's it, it's automatically included in `CARD_DB` and the deck.
 
 ## How many copies are in the deck
 
@@ -63,5 +63,5 @@ Cards currently render as labelled placeholders via
 `apps/web/src/components/PlaceholderCard.tsx`. Each card has an `art` string used as
 the placeholder label. To use real images, replace the `.art` block in that
 component with an `<img>` sourced by the card's **definition id**
-(`defIdOf(id)` from `@school-days/shared`) — e.g. `/cards/${defIdOf(id)}.png`. No
+(`defIdOf(id)` from `@school-days/shared`), e.g. `/cards/${defIdOf(id)}.png`. No
 engine changes are needed.

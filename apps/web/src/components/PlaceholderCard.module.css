@@ -20,6 +20,28 @@
   padding: 0.45rem;
 }
 
+@keyframes cardFlyIn {
+  0% {
+    transform: translateY(34px) scale(0.7);
+    opacity: 0;
+    box-shadow: 0 0 0 0 transparent;
+  }
+  55% {
+    transform: translateY(-5px) scale(1.06);
+    opacity: 1;
+    box-shadow: 0 0 28px 6px var(--accent-glow);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.animated {
+  animation: cardFlyIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity, box-shadow;
+}
+
 .clickable {
   cursor: pointer;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
@@ -75,6 +97,28 @@
   color: #e06c75;
   line-height: 1.2;
 }
+.barriers {
+  font-size: 0.64rem;
+  color: #d19a66;
+  line-height: 1.2;
+}
+.connection {
+  font-size: 0.64rem;
+  color: #98c379;
+  line-height: 1.2;
+  background: rgba(152, 195, 121, 0.1);
+  border: 1px solid rgba(152, 195, 121, 0.3);
+  border-radius: 0.3rem;
+  padding: 0.2rem 0.4rem;
+  margin-top: 0.25rem;
+}
+.teach {
+  font-size: 0.62rem;
+  color: #61afef;
+  line-height: 1.2;
+  font-style: italic;
+  margin-top: 0.25rem;
+}
 
 /* Type accent colors (drive the --edge custom property). */
 .card[data-type='situation'] { --edge: #e06c75; }
@@ -84,3 +128,5 @@
 .card[data-type='strength'] { --edge: #c678dd; }
 .card[data-type='friend'] { --edge: #56b6c2; }
 .card[data-type='character'] { --edge: #ffd166; }
+.card[data-type='support'] { --edge: #61afef; }
+.card[data-type='selfadvocacy'] { --edge: #98c379; }

@@ -3,33 +3,160 @@
   display: grid;
   place-items: center;
   padding: 1.5rem;
+  background: url('/snpbg2.jpeg') center/cover no-repeat fixed;
+  position: relative;
+  isolation: isolate;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.paletteSelector {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(8px);
+}
+.paletteSelect {
+  padding: 0.85rem 2.5rem 0.85rem 1.2rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.5rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+.paletteSelect:hover {
+  border-color: var(--accent);
+  background: var(--input-bg);
+}
+.paletteSelect:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.randomizeBtn {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 1.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.2s, border-color 0.2s, color 0.2s;
+}
+.randomizeBtn:hover {
+  transform: scale(1.1);
+  background: var(--input-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.topRight {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(8px);
+}
+
+.tutorialBtn {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text-primary);
+  border-radius: 0.4rem;
+  padding: 0.9rem 1.65rem;
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.tutorialBtn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--ghost-hover);
+  transform: translateY(-1px);
+}
+
+.helpBtn {
+  width: 4.35rem;
+  height: 4.35rem;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 2.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.2s, border-color 0.2s, color 0.2s;
+}
+.helpBtn:hover {
+  transform: scale(1.1);
+  background: var(--input-bg);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .panel {
+  position: relative;
+  z-index: 1;
   width: min(24rem, 100%);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   padding: 1.75rem;
   border-radius: 1rem;
-  background: #1a1e2b;
-  border: 1px solid #2c3245;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
 }
 
 .title {
   margin: 0;
   font-size: 1.7rem;
+  color: var(--text-primary);
 }
 .sub {
   margin: 0 0 0.5rem;
-  color: #9aa0b5;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
 .label {
   font-size: 0.75rem;
-  color: #9aa0b5;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -37,14 +164,20 @@
 .input {
   padding: 0.65rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid #333a50;
-  background: #12151f;
-  color: #e7e9f3;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-primary);
   font: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 .input:focus {
-  outline: 2px solid #61afef;
-  border-color: transparent;
+  outline: none;
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: var(--panel);
+}
+.input::placeholder {
+  color: var(--text-muted);
 }
 
 .row {
@@ -66,28 +199,47 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s, background 0.2s, color 0.2s;
 }
 .primary {
-  background: #61afef;
-  color: #0b1020;
+  background: var(--primary);
+  color: var(--primary-text);
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--accent-glow);
+}
+.primary:active:not(:disabled) {
+  transform: translateY(0);
 }
 .primary:disabled {
-  background: #2c3245;
-  color: #6b7189;
+  background: var(--panel-border);
+  color: var(--text-muted);
   cursor: not-allowed;
+  box-shadow: none;
 }
 .secondary {
-  background: #2c3245;
-  color: #e7e9f3;
+  background: var(--secondary);
+  color: var(--secondary-text);
+  border: 1px solid var(--panel-border);
+}
+.secondary:hover:not(:disabled) {
+  background: var(--input-bg);
+  border-color: var(--accent);
 }
 .ghost {
-  background: transparent;
-  color: #9aa0b5;
+  background: var(--ghost);
+  color: var(--text-secondary);
+}
+.ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--ghost-hover);
 }
 
 .divider {
   text-align: center;
-  color: #6b7189;
+  color: var(--text-muted);
   font-size: 0.8rem;
   margin: 0.25rem 0;
 }
@@ -106,35 +258,37 @@
   align-items: center;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  background: #12151f;
+  background: var(--player-item);
+  border: 1px solid var(--player-item-border);
 }
 .pname {
   font-weight: 600;
+  color: var(--text-primary);
 }
 .host,
 .you {
   font-size: 0.65rem;
   text-transform: uppercase;
-  color: #ffd166;
+  color: var(--accent);
   margin-left: 0.35rem;
 }
 .you {
-  color: #56b6c2;
+  color: var(--primary);
 }
 .ready {
-  color: #98c379;
+  color: var(--primary);
   font-size: 0.85rem;
 }
 .notReady {
-  color: #e06c75;
+  color: var(--accent);
   font-size: 0.85rem;
 }
 .hint,
 .warn {
   font-size: 0.8rem;
-  color: #9aa0b5;
+  color: var(--text-secondary);
   margin: 0;
 }
 .warn {
-  color: #d19a66;
+  color: var(--accent);
 }

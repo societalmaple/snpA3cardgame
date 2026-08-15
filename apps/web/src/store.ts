@@ -1,8 +1,10 @@
 import { create } from 'zustand';
-import type { RoomState, PlayerView, Session, Action } from '@school-days/shared';
+import type { RoomState, PlayerView, Session, Action, ColorPalette } from '@school-days/shared';
 import { createSocket, type GameSocket } from './net/socket.ts';
+import { PALETTES } from '@school-days/shared';
 
 const STORAGE_KEY = 'school-days-session';
+const PALETTE_KEY = 'school-days-palette';
 
 function loadSession(): Session | null {
   try {
@@ -18,6 +20,23 @@ function saveSession(session: Session | null): void {
   else localStorage.removeItem(STORAGE_KEY);
 }
 
+function loadPalette(): ColorPalette | null {
+  try {
+    const raw = localStorage.getItem(PALETTE_KEY);
+    return raw ? (JSON.parse(raw) as ColorPalette) : null;
+  } catch {
+    return null;
+  }
+}
+
+function savePalette(palette: ColorPalette): void {
+  localStorage.setItem(PALETTE_KEY, JSON.stringify(palette));
+}
+
+function pickRandomPalette(): ColorPalette {
+  return PALETTES[Math.floor(Math.random() * PALETTES.length)]!;
+}
+
 interface Store {
   socket: GameSocket | null;
   connected: boolean;
@@ -25,6 +44,7 @@ interface Store {
   room: RoomState | null;
   view: PlayerView | null;
   error: string | null;
+  palette: ColorPalette;
 
   init: () => void;
   createRoom: (name: string) => void;
@@ -34,15 +54,25 @@ interface Store {
   sendAction: (action: Action) => void;
   leave: () => void;
   clearError: () => void;
+  refreshPalette: () => void;
+  setPalette: (palette: ColorPalette) => void;
 }
 
-export const useStore = create<Store>((set, get) => ({
+const initialState: Omit<
+  Store,
+  'init' | 'createRoom' | 'joinRoom' | 'setReady' | 'startGame' | 'sendAction' | 'leave' | 'clearError' | 'refreshPalette' | 'setPalette'
+> = {
   socket: null,
   connected: false,
   session: loadSession(),
   room: null,
   view: null,
   error: null,
+  palette: loadPalette() ?? pickRandomPalette(),
+};
+
+export const useStore = create<Store>((set, get) => ({
+  ...initialState,
 
   init: () => {
     if (get().socket) return; // once only
@@ -107,4 +137,15 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  refreshPalette: () => {
+    const newPalette = pickRandomPalette();
+    savePalette(newPalette);
+    set({ palette: newPalette });
+  },
+
+  setPalette: (palette: ColorPalette) => {
+    savePalette(palette);
+    set({ palette });
+  },
 }));

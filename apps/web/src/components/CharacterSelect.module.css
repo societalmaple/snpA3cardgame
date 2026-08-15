@@ -3,39 +3,144 @@
   display: grid;
   place-items: center;
   padding: 1.5rem;
+  background: url('/snpbg2.jpeg') center/cover no-repeat fixed;
+  position: relative;
+  isolation: isolate;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.paletteSelector {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(8px);
+}
+.paletteSelect {
+  padding: 0.85rem 2.5rem 0.85rem 1.2rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.5rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+.paletteSelect:hover {
+  border-color: var(--accent);
+  background: var(--input-bg);
+}
+.paletteSelect:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.randomizeBtn {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 1.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.2s, border-color 0.2s, color 0.2s;
+}
+.randomizeBtn:hover {
+  transform: scale(1.1);
+  background: var(--input-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.helpBtn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  width: 4.35rem;
+  height: 4.35rem;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 2.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.2s, border-color 0.2s, color 0.2s;
+}
+.helpBtn:hover {
+  transform: scale(1.1);
+  background: var(--input-bg);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .panel {
-  width: min(40rem, 100%);
+  position: relative;
+  z-index: 1;
+  width: min(48rem, 96vw);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   padding: 1.75rem;
   border-radius: 1rem;
-  background: #1a1e2b;
-  border: 1px solid #2c3245;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
 }
 
 .title {
   margin: 0;
   font-size: 1.6rem;
+  color: var(--text-primary);
 }
 .sub {
   margin: 0;
-  color: #9aa0b5;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 .chosen {
-  color: #cfd3e6;
+  color: var(--text-secondary);
 }
 
 .cards {
   display: flex;
   gap: 0.75rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   margin: 0.5rem 0;
+  padding: 1.25rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--player-item);
+  border: 1px solid var(--player-item-border);
 }
 
 .players {
@@ -51,19 +156,20 @@
   justify-content: space-between;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  background: #12151f;
+  background: var(--player-item);
+  border: 1px solid var(--player-item-border);
 }
 .you {
   font-size: 0.65rem;
   text-transform: uppercase;
-  color: #56b6c2;
+  color: var(--primary);
   margin-left: 0.35rem;
 }
 .ready {
-  color: #98c379;
+  color: var(--primary);
   font-size: 0.9rem;
 }
 .waiting {
-  color: #d19a66;
+  color: var(--accent);
   font-size: 0.9rem;
 }

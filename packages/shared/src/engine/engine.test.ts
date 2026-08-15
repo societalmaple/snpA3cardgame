@@ -5,24 +5,28 @@ import {
   getLegalActions,
   redactFor,
   cardOf,
+  makeInstanceId,
   applyEffect,
+  nextInt,
+  SITUATION_DEFS,
   TARGET_LEVEL,
   HAND_LIMIT,
   type Action,
   type GameState,
 } from '../index.ts';
 
+/** Collect every card instance id currently on the table (no decks anymore). */
 function gatherIds(state: GameState): string[] {
   const ids: string[] = [];
   for (const p of state.players) {
     if (p.characterId) ids.push(p.characterId);
-    ids.push(...p.situationHand, ...p.experienceHand, ...p.strengths);
+    ids.push(...p.situationHand, ...p.experienceHand, ...p.strengths, ...p.supports);
     if (p.friendId) ids.push(p.friendId);
     if (p.clubId) ids.push(p.clubId);
   }
   ids.push(...state.availableCharacters);
-  ids.push(...state.situationDeck, ...state.situationDiscard, ...state.experienceDeck, ...state.experienceDiscard);
   if (state.activeSituation) ids.push(state.activeSituation.cardId);
+  if (state.activeMessUp) ids.push(state.activeMessUp);
   return ids;
 }
 const sig = (state: GameState) => gatherIds(state).slice().sort().join('|');
@@ -68,7 +72,7 @@ describe('setup', () => {
 });
 
 describe('redaction', () => {
-  it('shows own hands but only counts for opponents and decks', () => {
+  it('shows own hands but only counts for opponents', () => {
     const view = redactFor(twoPlayers(), 'p2');
     expect(view.you).toBe('p2');
     expect(view.yourExperienceHand).toHaveLength(4);
@@ -76,8 +80,9 @@ describe('redaction', () => {
     expect(p1.experienceHandCount).toBe(4);
     expect('experienceHand' in p1).toBe(false);
     expect('situationHand' in p1).toBe(false);
-    expect(typeof view.situationDeckCount).toBe('number');
-    expect((view as unknown as Record<string, unknown>).situationDeck).toBeUndefined();
+    const v = view as unknown as Record<string, unknown>;
+    expect(v.situationDeck).toBeUndefined();
+    expect(v.experienceDeck).toBeUndefined();
   });
 });
 
@@ -135,18 +140,17 @@ describe('combat and victory', () => {
   it('wins the game by solving a Situation to reach TARGET_LEVEL (15)', () => {
     expect(TARGET_LEVEL).toBe(15);
     const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 777);
-    const sitId = base.situationDeck.find((id) => {
-      const c = cardOf(id);
-      return c?.type === 'situation' && c.difficulty <= 3;
-    })!;
+    // sit-01 (diff 6, connects Bodily-Kinesthetic + Musical) solved with both
+    // connected strengths → effective difficulty 4, total 2+3=5 → wins.
     const s: GameState = {
       ...base,
       phase: 'combat',
       currentPlayerIndex: 0,
-      activeSituation: { cardId: sitId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      activeSituation: { cardId: makeInstanceId('sit-01', 900), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
       turnFlags: { enteredCombatThisTurn: true },
-      // Level no longer adds to the total, so equip a Strength big enough to win.
-      players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: TARGET_LEVEL - 1, strengths: ['str-08__700'] } : p)),
+      players: base.players.map((p) =>
+        p.id === 'p1' ? { ...p, level: TARGET_LEVEL - 1, strengths: ['str-05__901', 'str-04__902'] } : p,
+      ),
     };
     const res = applyAction(s, { type: 'RESOLVE_COMBAT', playerId: 'p1' });
     expect(res.ok).toBe(true);
@@ -156,42 +160,51 @@ describe('combat and victory', () => {
     expect(applyAction(res.state, { type: 'END_TURN', playerId: 'p1' }).ok).toBe(false);
   });
 
-  it('counts equipped bonuses only (not level) and wins on total >= difficulty', () => {
+  it('counts equipped bonuses only (not level): lose without a match, win when total >= effective', () => {
     const base = twoPlayers();
-    const sit2 = base.situationDeck.find((id) => {
-      const c = cardOf(id);
-      return c?.type === 'situation' && c.difficulty === 2;
-    })!; // sit-01 (difficulty 2, +1 level)
-    const combat = (extra: Partial<{ strengths: string[] }>): GameState => ({
+    const combat = (extra: Partial<{ strengths: string[]; friendId: string | null; clubId: string | null }>): GameState => ({
       ...base,
       phase: 'combat',
       currentPlayerIndex: 0,
-      activeSituation: { cardId: sit2, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      activeSituation: { cardId: makeInstanceId('sit-02', 1), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
       turnFlags: { enteredCombatThisTurn: true },
       players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: 14, strengths: [], friendId: null, clubId: null, ...extra } : p)),
     });
 
-    // High level but no equipped bonus → total 0 < 2 → loses.
+    // sit-02 (diff 6, connects Linguistic). High level but no equipped bonus → total 0 < 6 → loses.
     const loss = applyAction(combat({}), { type: 'RESOLVE_COMBAT', playerId: 'p1' });
     expect(loss.ok).toBe(true);
     if (!loss.ok) return;
     expect(loss.state.winnerId).toBeNull();
 
-    // Equip exactly +2 vs difficulty 2 → total == difficulty → wins (>=).
-    const win = applyAction(combat({ strengths: ['str-02__700'] }), { type: 'RESOLVE_COMBAT', playerId: 'p1' });
+    // Bodily-Kinesthetic +2 doesn't match Linguistic → effective 6, total 2 < 6 → loses.
+    const loss2 = applyAction(combat({ strengths: [makeInstanceId('str-05', 2)] }), { type: 'RESOLVE_COMBAT', playerId: 'p1' });
+    expect(loss2.ok).toBe(true);
+    if (!loss2.ok) return;
+    expect(loss2.state.winnerId).toBeNull();
+
+    // Intrapersonal +4 doesn't match Linguistic → effective 6, total 4 < 6 → loses.
+    const loss3 = applyAction(combat({ strengths: [makeInstanceId('str-07', 3)] }), { type: 'RESOLVE_COMBAT', playerId: 'p1' });
+    expect(loss3.ok).toBe(true);
+    if (!loss3.ok) return;
+    expect(loss3.state.winnerId).toBeNull();
+
+    // Linguistic (+2) matched, effective 4; plus Logical-Mathematical (+3) → total 5 ≥ 4 → wins.
+    const win = applyAction(combat({ strengths: [makeInstanceId('str-01', 4), makeInstanceId('str-02', 5)] }), {
+      type: 'RESOLVE_COMBAT',
+      playerId: 'p1',
+    });
     expect(win.ok).toBe(true);
-    if (!win.ok) return;
-    expect(win.state.players.find((p) => p.id === 'p1')!.level).toBeGreaterThan(14);
+    if (win.ok) expect(win.state.winnerId).toBe('p1');
   });
 
   it('counts an accepted helper toward the combat total', () => {
     const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 555);
-    const sitId = base.situationDeck.find((id) => cardOf(id)?.type === 'situation')!;
     const s: GameState = {
       ...base,
       phase: 'combat',
       currentPlayerIndex: 0,
-      activeSituation: { cardId: sitId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      activeSituation: { cardId: makeInstanceId('sit-02', 7), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
       turnFlags: { enteredCombatThisTurn: true },
     };
     const asked = applyAction(s, { type: 'ASK_FOR_HELP', playerId: 'p1', helperId: 'p2', offeredExperience: 1 });
@@ -208,17 +221,14 @@ describe('combat and victory', () => {
 });
 
 describe('strength consumption and unequip', () => {
-  it('discards equipped Strengths when a Situation is solved, but keeps Friend/Club', () => {
+  it('removes equipped Strengths when a Situation is solved, but keeps Friend/Club', () => {
     const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 4242);
-    const sitId = base.situationDeck.find((id) => {
-      const c = cardOf(id);
-      return c?.type === 'situation' && c.difficulty <= 3;
-    })!;
+    // sit-02 (diff 6, connects Linguistic) solved with str-01 → effective 4, total 2+3=5 → wins.
     const s: GameState = {
       ...base,
       phase: 'combat',
       currentPlayerIndex: 0,
-      activeSituation: { cardId: sitId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      activeSituation: { cardId: makeInstanceId('sit-02', 5), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
       turnFlags: { enteredCombatThisTurn: true },
       players: base.players.map((p) =>
         p.id === 'p1'
@@ -231,22 +241,20 @@ describe('strength consumption and unequip', () => {
     if (!res.ok) return;
     const p1 = res.state.players.find((p) => p.id === 'p1')!;
     expect(p1.strengths).toEqual([]); // strengths consumed
+    expect(p1.level).toBe(6);
     expect(p1.friendId).toBe('fnd-01__902'); // friend kept
     expect(p1.clubId).toBe('club-01__903'); // club kept
-    expect(res.state.experienceDiscard).toEqual(expect.arrayContaining(['str-01__900', 'str-02__901']));
   });
 
   it('keeps equipped Strengths when the solve attempt fails', () => {
     const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 4243);
-    const hardId = base.situationDeck.find((id) => {
-      const c = cardOf(id);
-      return c?.type === 'situation' && c.difficulty >= 5 && c.consequences.every((e) => e.type === 'LOSE_LEVEL');
-    })!;
+    // sit-19 (diff 15, connects Spatial + Interpersonal, LOSE_LEVEL consequences).
+    // Bodily-Kinesthetic +2 doesn't match → effective 15, total 2 < 15 → loses.
     const s: GameState = {
       ...base,
       phase: 'combat',
       currentPlayerIndex: 0,
-      activeSituation: { cardId: hardId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      activeSituation: { cardId: makeInstanceId('sit-19', 9), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
       turnFlags: { enteredCombatThisTurn: true },
       players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: 1, strengths: ['str-05__900'] } : p)),
     };
@@ -272,7 +280,7 @@ describe('strength consumption and unequip', () => {
     expect(p1.experienceHand).toEqual(['str-08__900']);
   });
 
-  it('unequips a Club back into the situation hand', () => {
+  it('unequips a Club back into the experience hand', () => {
     const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }], 901);
     const s: GameState = {
       ...base,
@@ -285,7 +293,7 @@ describe('strength consumption and unequip', () => {
     if (!res.ok) return;
     const p1 = res.state.players.find((p) => p.id === 'p1')!;
     expect(p1.clubId).toBeNull();
-    expect(p1.situationHand).toEqual(['club-02__900']);
+    expect(p1.experienceHand).toEqual(['club-02__900']);
   });
 
   it('rejects unequip when the hand is already full', () => {
@@ -302,17 +310,15 @@ describe('strength consumption and unequip', () => {
 });
 
 describe('failure discard consequences', () => {
-  it('lets the player choose what to discard — including an equipped card — after failing', () => {
+  it('lets the player choose what to discard, including an equipped card, after failing', () => {
     const base = twoPlayers();
-    const sitId = base.situationDeck.find((id) => {
-      const c = cardOf(id);
-      return c?.type === 'situation' && c.consequences.length === 1 && c.consequences[0]!.type === 'DISCARD_EXPERIENCE';
-    })!;
+    // sit-03 (diff 7, connects Spatial, DISCARD_EXPERIENCE x1). Linguistic +2 doesn't match →
+    // effective 7, total 2 < 7 → loses, so the player must discard an Experience card.
     const s: GameState = {
       ...base,
       phase: 'combat',
       currentPlayerIndex: 0,
-      activeSituation: { cardId: sitId, fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      activeSituation: { cardId: makeInstanceId('sit-03', 3), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
       turnFlags: { enteredCombatThisTurn: true },
       // one equipped Strength, empty hands, so the only way to pay the discard is the equipped card
       players: base.players.map((p) => (p.id === 'p1' ? { ...p, strengths: ['str-01__700'], experienceHand: [], situationHand: [] } : p)),
@@ -334,21 +340,29 @@ describe('failure discard consequences', () => {
     if (!after.ok) return;
     expect(after.state.phase).toBe('main');
     expect(after.state.players.find((p) => p.id === 'p1')!.strengths).toEqual([]);
-    expect(after.state.experienceDiscard).toContain('str-01__700');
   });
 });
 
 describe('hand limit', () => {
+  /** Find an rng state whose next Situation draw lands in the hand (a levelup). */
+  function findHandCardDrawRng(): number {
+    for (let s = 1; s < 1_000_000; s++) {
+      const r = nextInt(s, SITUATION_DEFS.length);
+      const c = SITUATION_DEFS[r.value]!;
+      if (c.type === 'levelup') return s;
+    }
+    throw new Error('no qualifying rngState found');
+  }
+
   it('drawing over the limit forces a discard, and you choose what to keep', () => {
     const base = twoPlayers();
     const fullHand = Array.from({ length: HAND_LIMIT }, (_, i) => `str-01__${900 + i}`);
-    const clubOnTop = 'club-01__999';
     const s: GameState = {
       ...base,
       currentPlayerIndex: 0,
       phase: 'await_action',
+      rngState: findHandCardDrawRng(),
       players: base.players.map((p) => (p.id === 'p1' ? { ...p, experienceHand: fullHand, situationHand: [] } : p)),
-      situationDeck: [...base.situationDeck, clubOnTop], // drawn next (top = end)
     };
     const drawn = applyAction(s, { type: 'DRAW_SITUATION', playerId: 'p1' });
     expect(drawn.ok).toBe(true);
@@ -375,12 +389,11 @@ describe('hand limit', () => {
 });
 
 describe('full auto-played game', () => {
-  it('conserves every card, rotates turns, and produces a winner', () => {
+  it('rotates turns, keeps every instance id unique, and produces a winner', () => {
     let s = createGame(
       [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }, { id: 'p3', name: 'Cara' }],
       2024,
     );
-    const initialSig = sig(s);
     const seenCurrent = new Set<string>();
     let steps = 0;
     const MAX = 20000;
@@ -394,12 +407,20 @@ describe('full auto-played game', () => {
         expect(r.ok).toBe(true);
         if (!r.ok) break;
         s = r.state;
-        expect(sig(s)).toBe(initialSig);
         continue;
       }
       if (s.phase === 'await_help') {
         const r = applyAction(s, { type: 'RESPOND_TO_HELP', playerId: s.pendingHelp!.helperId, accept: false });
         expect(r.ok).toBe(true);
+        if (!r.ok) break;
+        s = r.state;
+        continue;
+      }
+      if (s.phase === 'messup') {
+        const legalM = getLegalActions(s, s.players[s.currentPlayerIndex]!.id);
+        const mitigation = legalM.mitigations[0] ?? null;
+        const r = applyAction(s, { type: 'RESOLVE_MESS_UP', playerId: s.players[s.currentPlayerIndex]!.id, cardId: mitigation });
+        expect(r.ok, r.ok ? '' : r.error).toBe(true);
         if (!r.ok) break;
         s = r.state;
         continue;
@@ -423,7 +444,11 @@ describe('full auto-played game', () => {
       expect(r.ok, r.ok ? '' : r.error).toBe(true);
       if (!r.ok) break;
       s = r.state;
-      expect(sig(s)).toBe(initialSig); // no card created or destroyed
+
+      // Infinite draws mint fresh instances: every id on the table must be unique and resolvable.
+      const ids = gatherIds(s);
+      expect(new Set(ids).size).toBe(ids.length);
+      for (const id of ids) expect(cardOf(id)).toBeTruthy();
       for (const p of s.players) expect(p.level).toBeGreaterThanOrEqual(1);
     }
 

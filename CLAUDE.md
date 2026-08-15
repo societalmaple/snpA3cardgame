@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-An online, multiplayer web card game ("School Days", working title) for 2–4 players.
+An online, multiplayer web card game ("Solve It!", working title) for 2–4 players.
 Players race to Well-Being **Level 15**; the winning level must come from *solving a
 Situation*. Full game design is in [`directions.md`](./directions.md); the build
 plan and decisions are in [`PLAN.md`](./PLAN.md).
@@ -50,7 +50,7 @@ apps/server/       Socket.IO server: rooms, lobby, authority, per-player redacti
 apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
 ```
 
-### `packages/shared` — the engine (start here)
+### `packages/shared`, the engine (start here)
 - **Pure & deterministic.** `engine/reduce.ts` `applyAction(state, action)` returns a
   `Result` (never throws on bad input) and is the *only* way to mutate game state.
   Randomness is a seeded PRNG threaded through state (`engine/rng.ts`), so games are
@@ -60,7 +60,7 @@ apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
   no per-card code. Card data is in `cards/data/*.ts`; see [`docs/adding-cards.md`](./docs/adding-cards.md).
 - **Card instances.** Decks hold multiple copies of a definition, so state tracks
   *instance* ids (`str-01__12`); use `cardOf(id)` / `defIdOf(id)` from `cards/index.ts`.
-- **Flow.** A game opens in the `character_select` phase — players simultaneously
+- **Flow.** A game opens in the `character_select` phase, players simultaneously
   `CHOOSE_CHARACTER` (each Character is unique) before the first turn; `characterId` is
   null until chosen. Then normal turns (`await_action` → `combat` → `main`).
 - **Combat.** Total = equipped Strength + Friend + Club bonuses only (**Level does not
@@ -74,7 +74,7 @@ apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
 - **Discard phase.** The `discard` phase carries a `discardTask`: `limit` (trim to
   `HAND_LIMIT`, hand cards only) or `count` (pay a "discard N" consequence from hand
   *or equipped* cards). `DISCARD_CARD` resolves it, then resumes the prior phase.
-  Situation consequences are applied via `applyConsequences` — non-discard effects
+  Situation consequences are applied via `applyConsequences`, non-discard effects
   resolve immediately; discard effects become an interactive `count` task.
 - **Strengths are consumed** when a Situation is solved (RESOLVE_COMBAT win discards
   the winner's equipped Strengths; Friends/Clubs stay). `UNEQUIP_CARD` returns an
@@ -82,16 +82,16 @@ apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
 - `protocol.ts` is the typed Socket.IO contract shared by both ends.
 
 ### `apps/server`
-- `rooms.ts` `RoomManager` — in-memory (no DB), anonymous 4-letter room codes, lobby
+- `rooms.ts` `RoomManager`, in-memory (no DB), anonymous 4-letter room codes, lobby
   → ready → start, reconnect via a per-player token. It owns the full `GameState` and
   runs `applyAction`. `index.ts` wires it to Socket.IO and broadcasts a redacted
   `game:view` to each player after every change. **Server forces `action.playerId` to
-  the authenticated sender** — clients can't act as anyone else.
+  the authenticated sender**, clients can't act as anyone else.
 
 ### `apps/web`
 - `store.ts` (Zustand) holds the socket, the current `RoomState`, and the latest
   redacted `PlayerView`; it persists the session to `localStorage` for reconnect.
-- `components/` — `Lobby`, `Game`, `PlaceholderCard`. UI enables controls purely from
+- `components/`, `Lobby`, `Game`, `PlaceholderCard`. UI enables controls purely from
   `view.legal`. Styling is scoped CSS Modules; no global-style leakage.
 
 ## Conventions
@@ -99,7 +99,7 @@ apps/web/          React + Vite client: lobby + game UI, Zustand store, socket
   `allowImportingTsExtensions`). This keeps files runnable by bare Node *and* by
   Vite/Vitest. Cross-package imports use the bare `@school-days/shared` specifier.
 - Keep game logic in `packages/shared`; never put rules in the server or UI.
-- To add/change cards, edit data files only — see `docs/adding-cards.md`.
+- To add/change cards, edit data files only, see `docs/adding-cards.md`.
 - Placeholder art only; do not add or use mascot images (per `directions.md`).
 
 ## Status / not yet done
