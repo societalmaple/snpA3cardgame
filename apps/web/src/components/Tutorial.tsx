@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useStore } from '../store.ts';
+import { useStore, fontScaleOf } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
 import { TARGET_LEVEL, MAX_SUPPORTS, HAND_LIMIT } from '@school-days/shared';
 import styles from './Tutorial.module.css';
@@ -144,6 +144,7 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
     '--bg': palette.colors.background,
     '--bg-image': `url(${background})`,
     '--font-family': font,
+    '--font-scale': String(fontScaleOf(font)),
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,

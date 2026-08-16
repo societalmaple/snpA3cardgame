@@ -1,4 +1,4 @@
-import { useStore } from '../store.ts';
+import { useStore, fontScaleOf } from '../store.ts';
 import { TARGET_LEVEL, MAX_SUPPORTS, HAND_LIMIT } from '@school-days/shared';
 import { FontSelect } from './FontSelect.tsx';
 import styles from './HelpScreen.module.css';
@@ -10,6 +10,7 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
     '--bg': palette.colors.background,
     '--bg-image': `url(${background})`,
     '--font-family': font,
+    '--font-scale': String(fontScaleOf(font)),
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,

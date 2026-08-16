@@ -20,15 +20,21 @@ export const BACKGROUNDS = [
 export interface FontOption {
   name: string;
   family: string;
+  /** Multiplier applied to card text so wider fonts (e.g. OpenDyslexic) keep their layout. */
+  scale: number;
 }
 
 export const FONTS: FontOption[] = [
-  { name: 'System', family: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" },
-  { name: 'Verdana', family: 'Verdana, Geneva, sans-serif' },
-  { name: 'Trebuchet', family: "'Trebuchet MS', Trebuchet, sans-serif" },
-  { name: 'Arial', family: 'Arial, Helvetica, sans-serif' },
-  { name: 'OpenDyslexic', family: "'OpenDyslexic', Verdana, sans-serif" },
+  { name: 'System', family: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif", scale: 1 },
+  { name: 'Verdana', family: 'Verdana, Geneva, sans-serif', scale: 1 },
+  { name: 'Trebuchet', family: "'Trebuchet MS', Trebuchet, sans-serif", scale: 1 },
+  { name: 'Arial', family: 'Arial, Helvetica, sans-serif', scale: 1 },
+  { name: 'OpenDyslexic', family: "'OpenDyslexic', Verdana, sans-serif", scale: 0.9 },
 ];
+
+export function fontScaleOf(font: string): number {
+  return FONTS.find((f) => f.family === font)?.scale ?? 1;
+}
 
 function loadSession(): Session | null {
   try {

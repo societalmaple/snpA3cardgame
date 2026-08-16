@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cardOf, type PlayerView, PALETTES } from '@school-days/shared';
-import { useStore } from '../store.ts';
+import { useStore, fontScaleOf } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
 import { HelpScreen } from './HelpScreen.tsx';
 import { FontSelect } from './FontSelect.tsx';
@@ -21,6 +21,7 @@ export function CharacterSelect({ view }: { view: PlayerView }) {
     '--bg': palette.colors.background,
     '--bg-image': `url(${background})`,
     '--font-family': font,
+    '--font-scale': String(fontScaleOf(font)),
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,

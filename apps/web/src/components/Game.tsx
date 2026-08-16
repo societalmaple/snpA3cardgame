@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { HAND_LIMIT, type Action, type CardInstanceId, type PlayerView, PALETTES } from '@school-days/shared';
-import { useStore } from '../store.ts';
+import { useStore, fontScaleOf } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
 import { CharacterSelect } from './CharacterSelect.tsx';
 import { HelpScreen } from './HelpScreen.tsx';
@@ -67,6 +67,7 @@ export function Game({ view }: { view: PlayerView }) {
     '--bg': palette.colors.background,
     '--bg-image': `url(${background})`,
     '--font-family': font,
+    '--font-scale': String(fontScaleOf(font)),
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,

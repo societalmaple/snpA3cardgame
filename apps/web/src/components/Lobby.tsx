@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MIN_PLAYERS, MAX_PLAYERS, PALETTES } from '@school-days/shared';
-import { useStore } from '../store.ts';
+import { useStore, fontScaleOf } from '../store.ts';
 import { HelpScreen } from './HelpScreen.tsx';
 import { Tutorial } from './Tutorial.tsx';
 import { HelpMenu } from './HelpMenu.tsx';
@@ -38,6 +38,7 @@ export function Lobby() {
     '--bg': palette.colors.background,
     '--bg-image': `url(${background})`,
     '--font-family': font,
+    '--font-scale': String(fontScaleOf(font)),
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,

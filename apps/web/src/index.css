@@ -1,3 +1,90 @@
+@font-face {
+  font-family: 'Arial';
+  src: local('Arial'), local('Arial Regular'), url('/fonts/arial.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Arial';
+  src: local('Arial Bold'), url('/fonts/arial-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Arial';
+  src: local('Arial Italic'), url('/fonts/arial-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Arial';
+  src: local('Arial Bold Italic'), url('/fonts/arial-bolditalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Verdana';
+  src: local('Verdana'), local('Verdana Regular'), url('/fonts/verdana.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Verdana';
+  src: local('Verdana Bold'), url('/fonts/verdana-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Verdana';
+  src: local('Verdana Italic'), url('/fonts/verdana-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Verdana';
+  src: local('Verdana Bold Italic'), url('/fonts/verdana-bolditalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Trebuchet MS';
+  src: local('Trebuchet MS'), local('Trebuchet MS Regular'), url('/fonts/trebuchet.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Trebuchet MS';
+  src: local('Trebuchet MS Bold'), url('/fonts/trebuchet-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Trebuchet MS';
+  src: local('Trebuchet MS Italic'), url('/fonts/trebuchet-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Trebuchet MS';
+  src: local('Trebuchet MS Bold Italic'), url('/fonts/trebuchet-bolditalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
