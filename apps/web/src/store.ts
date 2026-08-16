@@ -7,7 +7,14 @@ const STORAGE_KEY = 'school-days-session';
 const PALETTE_KEY = 'school-days-palette';
 const BACKGROUND_KEY = 'school-days-background';
 
-export const BACKGROUNDS = ['/bg1.jpg', '/bg2.jpg', '/bg3.jpg', '/bg4.jpg', '/bg5.jpg'];
+const BASE = import.meta.env.BASE_URL;
+export const BACKGROUNDS = [
+  `${BASE}bg1.jpg`,
+  `${BASE}bg2.jpg`,
+  `${BASE}bg3.jpg`,
+  `${BASE}bg4.jpg`,
+  `${BASE}bg5.jpg`,
+];
 
 function loadSession(): Session | null {
   try {
