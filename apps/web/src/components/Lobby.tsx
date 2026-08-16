@@ -7,7 +7,7 @@ import { HelpMenu } from './HelpMenu.tsx';
 import styles from './Lobby.module.css';
 
 export function Lobby() {
-  const { room, session, connected, createRoom, joinRoom, setReady, startGame, leave, palette, refreshPalette, setPalette } = useStore();
+  const { room, session, connected, createRoom, joinRoom, setReady, startGame, leave, palette, refreshPalette, setPalette, background, refreshBackground } = useStore();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [showMenu, setShowMenu] = useState(false);
@@ -35,6 +35,7 @@ export function Lobby() {
 
   const cssVars = {
     '--bg': palette.colors.background,
+    '--bg-image': `url(${background})`,
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,
@@ -84,6 +85,9 @@ export function Lobby() {
             </select>
             <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
               🎲
+            </button>
+            <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
+              🖼️
             </button>
           </div>
         </div>
@@ -158,6 +162,9 @@ export function Lobby() {
           </select>
           <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
             🎲
+          </button>
+          <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
+            🖼️
           </button>
         </div>
       </div>

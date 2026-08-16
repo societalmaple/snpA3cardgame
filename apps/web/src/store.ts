@@ -5,6 +5,9 @@ import { PALETTES } from '@school-days/shared';
 
 const STORAGE_KEY = 'school-days-session';
 const PALETTE_KEY = 'school-days-palette';
+const BACKGROUND_KEY = 'school-days-background';
+
+export const BACKGROUNDS = ['/bg1.jpg', '/bg2.jpg', '/bg3.jpg', '/bg4.jpg', '/bg5.jpg'];
 
 function loadSession(): Session | null {
   try {
@@ -37,6 +40,19 @@ function pickRandomPalette(): ColorPalette {
   return PALETTES[Math.floor(Math.random() * PALETTES.length)]!;
 }
 
+function loadBackground(): string | null {
+  try {
+    const raw = localStorage.getItem(BACKGROUND_KEY);
+    return raw && BACKGROUNDS.includes(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveBackground(bg: string): void {
+  localStorage.setItem(BACKGROUND_KEY, bg);
+}
+
 interface Store {
   socket: GameSocket | null;
   connected: boolean;
@@ -45,6 +61,7 @@ interface Store {
   view: PlayerView | null;
   error: string | null;
   palette: ColorPalette;
+  background: string;
 
   init: () => void;
   createRoom: (name: string) => void;
@@ -56,11 +73,22 @@ interface Store {
   clearError: () => void;
   refreshPalette: () => void;
   setPalette: (palette: ColorPalette) => void;
+  refreshBackground: () => void;
 }
 
 const initialState: Omit<
   Store,
-  'init' | 'createRoom' | 'joinRoom' | 'setReady' | 'startGame' | 'sendAction' | 'leave' | 'clearError' | 'refreshPalette' | 'setPalette'
+  | 'init'
+  | 'createRoom'
+  | 'joinRoom'
+  | 'setReady'
+  | 'startGame'
+  | 'sendAction'
+  | 'leave'
+  | 'clearError'
+  | 'refreshPalette'
+  | 'setPalette'
+  | 'refreshBackground'
 > = {
   socket: null,
   connected: false,
@@ -69,6 +97,7 @@ const initialState: Omit<
   view: null,
   error: null,
   palette: loadPalette() ?? pickRandomPalette(),
+  background: loadBackground() ?? BACKGROUNDS[0]!,
 };
 
 export const useStore = create<Store>((set, get) => ({
@@ -147,5 +176,14 @@ export const useStore = create<Store>((set, get) => ({
   setPalette: (palette: ColorPalette) => {
     savePalette(palette);
     set({ palette });
+  },
+
+  refreshBackground: () => {
+    let next = get().background;
+    while (next === get().background) {
+      next = BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]!;
+    }
+    saveBackground(next);
+    set({ background: next });
   },
 }));

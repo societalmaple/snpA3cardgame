@@ -14,7 +14,7 @@
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: url('/snpbg2.jpeg') center/cover no-repeat;
+  background: var(--bg-image, url('/bg1.jpg')) center/cover no-repeat;
 }
 
 .overlay {

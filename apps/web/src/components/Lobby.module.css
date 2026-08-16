@@ -20,7 +20,7 @@
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: url('/snpbg2.jpeg') center/cover no-repeat;
+  background: var(--bg-image, url('/bg1.jpg')) center/cover no-repeat;
 }
 
 .overlay {
@@ -83,7 +83,8 @@
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
-.randomizeBtn {
+.randomizeBtn,
+.bgBtn {
   width: 3.6rem;
   height: 3.6rem;
   border-radius: 50%;
@@ -99,7 +100,8 @@
   justify-content: center;
   transition: transform 0.15s, background 0.2s, border-color 0.2s, color 0.2s;
 }
-.randomizeBtn:hover {
+.randomizeBtn:hover,
+.bgBtn:hover {
   transform: scale(1.1);
   background: var(--input-bg);
   border-color: var(--accent);
@@ -339,7 +341,8 @@
     height: 3.5rem;
     font-size: 1.9rem;
   }
-  .randomizeBtn {
+  .randomizeBtn,
+  .bgBtn {
     width: 3.2rem;
     height: 3.2rem;
   }

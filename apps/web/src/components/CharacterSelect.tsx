@@ -6,7 +6,7 @@ import { HelpScreen } from './HelpScreen.tsx';
 import styles from './CharacterSelect.module.css';
 
 export function CharacterSelect({ view }: { view: PlayerView }) {
-  const { sendAction, leave, palette, refreshPalette, setPalette } = useStore();
+  const { sendAction, leave, palette, refreshPalette, setPalette, background, refreshBackground } = useStore();
   const [showHelp, setShowHelp] = useState(false);
   const me = view.you;
   const self = view.players.find((p) => p.id === me);
@@ -18,6 +18,7 @@ export function CharacterSelect({ view }: { view: PlayerView }) {
 
   const cssVars = {
     '--bg': palette.colors.background,
+    '--bg-image': `url(${background})`,
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,
@@ -68,6 +69,9 @@ export function CharacterSelect({ view }: { view: PlayerView }) {
           </select>
           <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
             🎲
+          </button>
+          <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
+            🖼️
           </button>
         </div>
       </div>

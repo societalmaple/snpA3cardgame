@@ -9,7 +9,7 @@ import { cardName } from '../cardDisplay.ts';
 import styles from './Game.module.css';
 
 export function Game({ view }: { view: PlayerView }) {
-  const { room, sendAction, leave, palette, refreshPalette, setPalette } = useStore();
+  const { room, sendAction, leave, palette, refreshPalette, setPalette, background, refreshBackground } = useStore();
   const { legal } = view;
   const [helpTarget, setHelpTarget] = useState('');
   const [offer, setOffer] = useState(0);
@@ -64,6 +64,7 @@ export function Game({ view }: { view: PlayerView }) {
 
   const cssVars = {
     '--bg': palette.colors.background,
+    '--bg-image': `url(${background})`,
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,
@@ -121,6 +122,9 @@ export function Game({ view }: { view: PlayerView }) {
             </select>
             <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
               🎲
+            </button>
+            <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
+              🖼️
             </button>
           </div>
         </div>

@@ -136,12 +136,13 @@ const STEPS: Step[] = [
 ];
 
 export function Tutorial({ onClose }: { onClose: () => void }) {
-  const { palette } = useStore();
+  const { palette, background } = useStore();
   const [index, setIndex] = useState(0);
   const step = STEPS[index]!;
 
   const cssVars = {
     '--bg': palette.colors.background,
+    '--bg-image': `url(${background})`,
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,

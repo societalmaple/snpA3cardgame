@@ -3,10 +3,11 @@ import { TARGET_LEVEL, MAX_SUPPORTS, HAND_LIMIT } from '@school-days/shared';
 import styles from './HelpScreen.module.css';
 
 export function HelpScreen({ onClose }: { onClose: () => void }) {
-  const { palette, refreshPalette } = useStore();
+  const { palette, refreshPalette, background, refreshBackground } = useStore();
 
   const cssVars = {
     '--bg': palette.colors.background,
+    '--bg-image': `url(${background})`,
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,
@@ -176,9 +177,19 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
           </section>
         </div>
 
-        <button className={styles.paletteToggle} onClick={refreshPalette} aria-label="Change color palette">
-          ✦ {palette.name}
-        </button>
+        <div className={styles.toggles}>
+          <button className={styles.paletteToggle} onClick={refreshPalette} aria-label="Change color palette">
+            ✦ {palette.name}
+          </button>
+          <button
+            className={styles.bgToggle}
+            onClick={refreshBackground}
+            aria-label="Randomize background"
+            title="Randomize background"
+          >
+            🖼️
+          </button>
+        </div>
       </div>
     </div>
   );
