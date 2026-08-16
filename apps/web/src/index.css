@@ -21,6 +21,7 @@ body {
   color: #e7e9f3;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
+  overflow-x: hidden;
 }
 
 button {

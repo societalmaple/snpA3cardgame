@@ -1,287 +1,180 @@
 # **Solve It!**
 
+An online, real-time **multiplayer web card game for 2–4 players**. This document
+describes the game as implemented. Cards, names, and artwork are **placeholders**;
+all card content lives in editable data files under `packages/shared/src/cards/data/`
+(see [`docs/adding-cards.md`](./docs/adding-cards.md)).
+
 ## **Goal of the Game**
 
-Your objective is to be the **first player to reach Well-Being Level 5**.
+Be the **first player to reach Well-Being Level 15** — but the winning level must
+come from **solving a Situation**, never from a Go-Up-A-Level card or a Mess-Up.
 
-The main ways to gain levels are:
+The main ways to gain levels:
 
-* Solving situations  
-* Playing "Increase Well-Being level" cards  
-* Certain card effects
-
----
-
-# **Game Setup**
-
-Each player receives:
-
-* 4 Experience cards  
-* 1 random character (we could outline traits here) card
-
-Everyone starts:
-
-* Level 1  
-* No Clubs  
-* No Strengths  
-* No Friends
-
-Before the game begins, you may play:
-
-* One Club  
-* Rank 1 Strengths  
-* One Friend
-
-Everything else stays in your hand.
+* Solving Situations
+* Playing "Go Up A Level" cards (these can never be the winning level)
 
 ---
 
-# **The Turn Structure**
+## **Game Setup**
 
-Every turn has four parts.
+* **2–4 players** join a room, mark themselves ready, and the host starts.
+* Before the first turn, every player **chooses a Character** from the pool. Each
+  Character is unique, so no two players may pick the same one.
+* Each player starts at **Level 1** with **4 Experience cards** dealt at random
+  (Strengths, Supports, Self-Advocacy, Friends, or Clubs).
+* No player starts with a Club, Strength, Friend, or Support equipped; you equip
+  them from your hand during play.
 
-## **1\. Face a situation**
+**Default equip limits:** 1 Character, 1 Friend, 1 Club, up to 2 active Supports,
+and unlimited Strengths.
 
-Draw one situation card face-up.
-
-Several things can happen.
-
-### **If it's a “bad situation”**
-
-Go solve it immediately.
-
----
-
-### **If it's a “mess-up”**
-
-The mess-up happens immediately.
-
-Examples:
-
-* Lose Level(s)  
-* Lose Strengths   
-* Discard cards
+**Hand limit:** you may hold at most **6 cards** across both hands (Situation +
+Experience). If a draw or reward pushes you over, you discard down and choose what
+to keep.
 
 ---
 
-### **If it's anything else**
+## **The Turn Structure**
 
-Put it into your hand.
+Each turn has a beginning, a combat step, and a main phase.
 
-Then choose either:
+## **1\. Beginning of your turn**
 
-* Solve a problem  
-* Gain problem-solving ability
+Choose **one** of these:
 
----
+* **Draw a Situation** from the Situation deck, or
+* **Take on a Situation** you're already holding in your hand.
 
-## **2\. Solve a problem (Optional)**
+### **If you draw a Situation card**
 
-Instead of ending your turn, you may play a situation from your hand and solve it.
+You **face it immediately** and enter combat (step 2). You do not put it in your
+hand first.
 
-Players often do this if they're strong enough.
+### **If you draw a Mess-Up card**
 
----
+It happens **immediately** (it represents an environmental or support barrier, not
+a personal failure). You may usually **mitigate** it with a matching Support,
+Self-Advocacy card, Strength, or Friend. If you can't (or choose not to), you take a
+small **temporary penalty** on your *next* Situation — never a permanent loss.
 
-## **3\. Gain Problem-solving ability**
+### **If you draw a Go Up A Level card**
 
-If you didn't have to solve a situation this turn,
+It goes into your **Situation hand** to play later. It can raise your level but can
+never be the winning level.
 
-Draw one experience card face-down.
+## **2\. Combat (solving a Situation)**
 
----
+A Situation has a **base difficulty** plus any temporary penalty carried over from an
+unmitigated Mess-Up. Your **total** is your equipped **Strength + Friend + Club**
+bonuses — **your Level does not count**. You win when `total ≥ modified difficulty`.
 
-# **Problem-solving**
+The **modified difficulty** is the base difficulty reduced by **any valid approach**
+you bring:
 
-Problem solving is:
+* a **relevant Strength** that fits the Situation,
+* an **active Support / Accommodation** (up to 2 equipped) that removes a barrier,
+* a **Self-Advocacy card** played during combat that addresses the barriers,
+* a **Friend or Club** (or your **Character** ability) that matches the barrier,
+* an **environmental change** the card unlocks.
 
-* Player Level  
-* Strength bonuses  
-* Club bonuses  
-* Friend bonuses  
-  vs.  
-* Situation Level  
-* Situation Enhancers (what’s different/what do you need to know about the situation)
+There is never a single "correct" answer; different approaches are useful in
+different contexts. The screen shows your approach and the modified difficulty.
 
-Example:
+**Win** → gain the listed Levels and Experience cards. Solving via a matched
+Strength, Support, or Self-Advocacy also **discovers** a new approach (an extra
+Experience card). Your equipped **Strengths are consumed** when you solve a Situation
+(Friends and Clubs stay).
 
-Your Level: 5
+**Lose** → suffer the Situation's **Consequences**. A discard consequence lets you
+choose what to lose, including equipped cards; some consequences can be cancelled
+with Self-Advocacy.
 
-Strength 1: \+3
+## **3\. Main phase**
 
-Strength 2: \+4
+Before resolving you may **equip or unequip** Strengths, Friends, Clubs, and Supports
+from your hands, or **ask another player for help** (their bonuses join yours).
 
-Friend: \+2
-
-Total \= 14
-
-Situation \= Level 11
-
-You win.
-
----
-
-If your total is equal to or lower than the situation,
-
-You lose unless you improve your strength before the turn ends.
+* If you end your turn without entering combat, you **draw one Experience card**
+  instead ("gain problem-solving ability").
 
 ---
 
 # **Asking for Help**
 
-You may ask **one player** to help.
+You may ask **one other player** to help you during combat.
 
 If they agree:
 
-Both players combine their strengths/skills.
-
-Usually, you'll promise experience cards as payment.
-
-Example:
-
-Situation rewards 4 experience cards.
-
-You promise your helper 2\.
-
-If you win:
-
-You still gain all Levels.
-
-Only Experience is shared.
-
----
-
-# **If You Lose**
-
-You couldn’t solve the situation.
-
-You will suffer the situation's Consequences.
-
-Examples:
-
-* Lose Levels  
-* Lose Experience card(s)
+* Their bonuses and valid approaches are combined with yours.
+* The active player keeps **all Level rewards**.
+* **Experience rewards are split** according to the agreement you offered.
 
 ---
 
 # **Every Card Type**
 
----
+## **Situation Cards** (20 unique)
 
-# **Situation Cards**
+The problems you solve. Each has:
 
-Door cards start combat and contain most of the game's special abilities.
+* a base difficulty
+* one or more **barriers** (noise, crowding, time pressure, unclear instructions, …)
+* valid Strengths, Supports, and Self-Advocacy options
+* a reward (Levels + Experience)
+* consequences if you lose
+* special abilities (alternate/environmental solutions, teamwork eligibility)
 
----
+## **Mess-Up Cards** (5 unique)
 
-## **Situations (maybe 20 unique)**
+Environmental or support barriers drawn from the Situation deck. They resolve
+immediately and are usually **mitigable**; without mitigation they impose only a
+small temporary penalty on your next Situation.
 
-These are problems you solve.
+## **Go Up A Level Cards** (4 unique)
 
-Each situation has:
+Raise your Well-Being Level instantly. They can **never** provide the winning level
+(level gains from these are capped below the target).
 
-* (Difficulty) Level  
-* Experience card/contentness reward  
-* Level/well-being reward  
-* Consequences if you lose  
-* Special abilities
+## **Club Cards** (7 unique)
 
----
+A supportive community. You may have **one** Club equipped at a time. Clubs come from
+**Experience draws**, not the Situation deck, and provide a combat bonus plus
+community effects. They are **not consumed** when you solve a Situation.
 
-## **Mess-up Cards (maybe like 4-5 unique)**
+## **Experience Cards**
 
-Examples:
+Experience cards come from solving Situations and from drawing in the main phase.
+They are dealt from the Experience deck, which contains:
 
-* Lose an Item  
-* Lose an Experience card  
-* Lose Levels  
-  * (of course it will actually be themed to fit the game but these are what they can do)
+### **Strength Cards** (8 unique, Howard Gardner's Multiple Intelligences)
 
-If drawn face-up,
+A modest base bonus plus a **contextual** effect; they shine when they fit the
+Situation. Equipped Strengths are **used up** when you solve a Situation. You may
+equip as many as you like.
 
-They happen immediately.
+### **Support / Accommodation Cards** (10 unique)
 
-If held in your hand,
+Tools and environmental changes that remove barriers (Quiet Workspace, Written
+Instructions, Extra Processing Time, …). Not "power-ups": they change the conditions
+so existing abilities can be used. Up to **2** may be active at once.
 
----
+### **Self-Advocacy Cards** (6 unique)
 
-## **Club Cards (5-10 unique)**
+One-shot cards you play while facing a Situation ("Can I Have That in Writing?", "I
+Need More Processing Time", …). Asking for a support is a skill, not a failure.
 
-You may normally have:
+### **Friend Cards** (6 unique)
 
-One Club.
+A companion providing a combat bonus and support effects. You may have **one**
+Friend equipped at a time. Friends are **not consumed** when you solve a Situation.
 
-Clubs provide:
+## **Character Cards** (4 unique)
 
-* Special abilities  
-* Restrictions  
-* Bonuses
-
-You may discard a Club at any time.
-
----
-
-## **Go Up A Level Cards (3-4 unique)**
-
-Exactly what they sound like.
-
-Gain one level instantly.
-
-Usually cannot win the game unless the card says otherwise.
-
----
-
-# **Experience Cards**
-
-Experience come from solving situations.
-
----
-
-## **Strengths (8 (from Gardner’s Theory)** **\- 20 if we can find more)**
-
-Strengths provide permanent bonuses.
-
-Examples:
-
-(stuff from Gardner’s Theory of Multiple Intelligences)
-
-They usually give:
-
-\+1
-
-\+3
-
-\+5
-
-etc.
-
----
-
-## **Friends (6 unique)**
-
-Normally,
-
-You may have one friend
-
-Friends:
-
-* Provide bonuses  
-* Sometimes have special skills  
-* Some cards let you have multiple friends.
-
----
-
-# **Character Cards (4 unique)**
-
-Every player has one.
-
-These are never discarded.
-
-They give a permanent passive ability.
-
-Each Character also has a male and female side.
-
-Examples include small bonuses such as interactions with card types.
+Chosen during setup, one per player, and **never discarded**. They give a permanent
+passive ability (e.g. Hyperfocus) that can unlock alternate solutions or bonus
+power in matching Situations.
 
 ---
 
@@ -289,81 +182,49 @@ Examples include small bonuses such as interactions with card types.
 
 You win immediately if:
 
-* You reach Level 5  
-* The final level comes from solving a situation
+* You reach **Level 15**, **and**
+* The final level comes from **solving a Situation**.
 
-Not from:
+You do **not** win via:
 
-* Most Go Up A Level cards  
-* Most mess-up effects
+* Go Up A Level cards (capped below the target)
+* Mess-Up effects
 
 ---
 
 # **Quick Reference**
 
-| Card Type | What it Does |
-| ----- | ----- |
-| Situation | Solve it to gain Levels and more Experience cards |
-| Mess-up | Hurts a player immediately or when played |
-| Club | Your community (with a special ability in-game) |
-| Go Up A Level | Gain one Level instantly |
-| Strengths | (usually) Permanent bonus |
-| Friend | Companion that helps in combat |
-| Character | Permanent character ability for the whole game |
+| Card Type | Deck | What it Does |
+| ----- | ----- | ----- |
+| Situation | Situation | Solve it to gain Levels and Experience |
+| Mess-Up | Situation | Environmental barrier; mitigate it or take a small temporary penalty |
+| Go Up A Level | Situation | Gain one Level instantly (never the winning level) |
+| Club | Experience | Your community; combat bonus, up to 1 equipped |
+| Strength | Experience | Bonus + contextual effect; consumed when you solve a Situation |
+| Support / Accommodation | Experience | Removes barriers; up to 2 equipped |
+| Self-Advocacy | Experience | One-shot card played during combat |
+| Friend | Experience | Companion that helps in combat; up to 1 equipped |
+| Character | setup | Permanent ability for the whole game |
 
-Once you've played a round or two, the flow becomes very natural: **Face a situation → Solve or find a situation to solve → Gain problem-solving ability → Gain strengths → Be the first to solve a situation at Level 4 and reach Level 5\.**
+**The flow becomes natural quickly:** Choose a character → draw (or take on) a
+Situation → equip or ask for help → solve it with a valid approach → gain levels,
+Experience, and discoveries → be the first to reach Level 15 by solving a Situation.
 
-**Coding Plan:**
+---
 
-Build the structure for a responsive, online, web-based multiplayer card game for 2–4 players. Integrate it into the existing website without changing unrelated pages or assets. Do not inspect, process, or use any mascot images.
+# **Implementation Notes**
 
-Use placeholder cards and placeholder artwork only. The actual card images, names, descriptions, bonuses, rewards, and effects will be added later. Store all card definitions in editable JSON or TypeScript data files so cards can be replaced or modified without rewriting the game engine.
-
-Create placeholders for:
-
-* 20 unique Situation cards  
-* 4–5 unique Mess-Up cards  
-* 7 unique Club cards  
-* 3–4 unique Go Up a Level cards  
-* 8 unique Strength cards, representing Howard Gardner’s eight Multiple Intelligences  
-* 6 unique Friend cards  
-* 4 unique Character cards
-
-Core rules:
-
-* Each player starts at Well-Being Level 1\.  
-* The first player to reach Level 5 wins, but the final level must normally come from successfully solving a Situation.  
-* Each player starts with 4 Experience cards and 1 random Character.  
-* Before the game begins, a player may activate one Club, one Friend, and any Rank 1 Strength cards.  
-* Default limits are 1 Character, 1 Friend, 1 Club, and unlimited Strengths.  
-* On each turn, the player chooses either to draw from the Situation deck or solve a Situation already in their hand.  
-* When drawing, Situation cards go into the player’s hand. Mess-Up cards resolve immediately and are discarded.  
-* To solve a Situation, calculate:
-
-`Player Level + Strength bonuses + Friend bonus + Club bonus`
-
-* The player succeeds only if the total is greater than the Situation difficulty.  
-* On success, award the listed Experience cards and Well-Being Levels.  
-* On failure, apply the Situation’s consequences.  
-* A player may ask one other player for help. Their totals are combined. The active player receives all Level rewards, while Experience rewards are split according to a selected agreement.  
-* Go Up a Level cards increase Well-Being Level but normally cannot provide the winning level.  
-* Automatically manage turn order, rewards, consequences, active bonuses, victory detection, discard piles, and deck reshuffling.
-
-Create separate Situation and Experience decks with matching discard piles. Build the game using a centralized, authoritative game state suitable for online multiplayer. Include a lobby or room structure, player joining, ready status, turn synchronization, reconnect handling, and validation so players cannot perform illegal actions or edit another player’s private state.
-
-Keep game logic separate from the interface. Implement card effects through reusable, data-driven effect definitions rather than hardcoded card-specific functions wherever possible.
-
-The interface should include:
-
-* Lobby and player setup  
-* Current player and turn indicator  
-* Player level, character, club, friend, strengths, bonuses, and hand size  
-* Private Situation and Experience hands for the local player  
-* Draw, Solve, Play Card, Ask for Help, Accept/Decline Help, and End Turn controls  
-* Current Situation display  
-* Ability-versus-difficulty calculation  
-* Reward, consequence, and game-event messages  
-* Placeholder card graphics with labels showing card type and placeholder number
-
-Use a clear folder structure for UI components, game engine logic, multiplayer/networking, state management, card data, types, and placeholder assets. Add comments or documentation explaining exactly where future developers should insert the final card images and edit each card’s statistics, text, abilities, rewards, and consequences.
-
+* The game uses a **pure, deterministic engine** (`packages/shared/src/engine/`) with
+  a seeded PRNG, so games are reproducible.
+* The **server is authoritative**; clients only ever see their own hands, and
+  opponents are reduced to public info + hand counts.
+* **Card effects are data-driven** (`Effect` descriptors interpreted by
+  `engine/effects.ts`); there is no per-card code. Add or change cards by editing the
+  data files only, see [`docs/adding-cards.md`](./docs/adding-cards.md).
+* **Combat math** lives in `engine/bonuses.ts`: equipped Strength + Friend + Club
+  bonuses vs. modified difficulty (Level never counts).
+* Tunables (target level, hand limit, starting hand, player bounds) live in
+  `packages/shared/src/constants.ts`.
+* **Discard handling**: a draw over the hand limit triggers a `limit` discard task
+  (hand cards only); a "discard N" consequence triggers a `count` task payable from
+  hand *or equipped* cards. Both route through the `discard` phase.
