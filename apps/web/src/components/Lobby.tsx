@@ -152,25 +152,29 @@ export function Lobby() {
           </button>
         </div>
         <div className={styles.paletteSelector}>
-          <select
-            value={palette.name}
-            onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
-            className={styles.paletteSelect}
-            aria-label="Select color palette"
-          >
-            {PALETTES.map((p) => (
-              <option key={p.name} value={p.name}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-          <FontSelect />
-          <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
-            🎲
-          </button>
-          <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
-            🖼️
-          </button>
+          <div className={styles.paletteRow}>
+            <select
+              value={palette.name}
+              onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+              className={styles.paletteSelect}
+              aria-label="Select color palette"
+            >
+              {PALETTES.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+              🎲
+            </button>
+          </div>
+          <div className={styles.paletteRow}>
+            <FontSelect />
+            <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
+              🖼️
+            </button>
+          </div>
         </div>
       </div>
       {showMenu && <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />}
