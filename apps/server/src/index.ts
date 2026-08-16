@@ -1,3 +1,4 @@
+import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { GAME_NAME, type ClientToServerEvents, type ServerToClientEvents } from '@school-days/shared';
 import { RoomManager, type Room } from './rooms.ts';
@@ -10,10 +11,20 @@ interface SocketData {
 const PORT = Number(process.env.PORT ?? 3001);
 const manager = new RoomManager();
 
-const io = new Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>(PORT, {
+const httpServer = createServer((req, res) => {
+  // Friendly HTTP responses so the server is browsable and uptime monitors
+  // (UptimeRobot etc.) get a 200 instead of a 404 "Cannot GET /".
+  const body = `${GAME_NAME} server is running. Connect over Socket.IO.`;
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+  res.end(body);
+});
+
+const io = new Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>(httpServer, {
   // Local dev only: reflect the Vite dev origin. Tighten this for any real deploy.
   cors: { origin: true, methods: ['GET', 'POST'] },
 });
+
+httpServer.listen(PORT);
 
 function broadcastViews(room: Room): void {
   if (!room.game) return;
