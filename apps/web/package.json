@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource/opendyslexic": "^5.3.0",
     "@school-days/shared": "*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

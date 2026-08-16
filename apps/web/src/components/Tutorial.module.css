@@ -6,6 +6,7 @@
   padding: 1.5rem;
   position: relative;
   isolation: isolate;
+  font-family: var(--font-family);
 }
 
 /* Fixed-layer background so the image never scrolls or crops on mobile. */

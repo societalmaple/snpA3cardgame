@@ -1,13 +1,15 @@
 import { useStore } from '../store.ts';
 import { TARGET_LEVEL, MAX_SUPPORTS, HAND_LIMIT } from '@school-days/shared';
+import { FontSelect } from './FontSelect.tsx';
 import styles from './HelpScreen.module.css';
 
 export function HelpScreen({ onClose }: { onClose: () => void }) {
-  const { palette, refreshPalette, background, refreshBackground } = useStore();
+  const { palette, refreshPalette, background, refreshBackground, font } = useStore();
 
   const cssVars = {
     '--bg': palette.colors.background,
     '--bg-image': `url(${background})`,
+    '--font-family': font,
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,
@@ -178,6 +180,7 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className={styles.toggles}>
+          <FontSelect />
           <button className={styles.paletteToggle} onClick={refreshPalette} aria-label="Change color palette">
             ✦ {palette.name}
           </button>

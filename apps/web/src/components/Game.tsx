@@ -5,11 +5,12 @@ import { PlaceholderCard } from './PlaceholderCard.tsx';
 import { CharacterSelect } from './CharacterSelect.tsx';
 import { HelpScreen } from './HelpScreen.tsx';
 import { Tutorial } from './Tutorial.tsx';
+import { FontSelect } from './FontSelect.tsx';
 import { cardName } from '../cardDisplay.ts';
 import styles from './Game.module.css';
 
 export function Game({ view }: { view: PlayerView }) {
-  const { room, sendAction, leave, palette, refreshPalette, setPalette, background, refreshBackground } = useStore();
+  const { room, sendAction, leave, palette, refreshPalette, setPalette, background, refreshBackground, font } = useStore();
   const { legal } = view;
   const [helpTarget, setHelpTarget] = useState('');
   const [offer, setOffer] = useState(0);
@@ -65,6 +66,7 @@ export function Game({ view }: { view: PlayerView }) {
   const cssVars = {
     '--bg': palette.colors.background,
     '--bg-image': `url(${background})`,
+    '--font-family': font,
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,
@@ -120,6 +122,7 @@ export function Game({ view }: { view: PlayerView }) {
                 </option>
               ))}
             </select>
+            <FontSelect />
             <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
               🎲
             </button>

@@ -3,10 +3,11 @@ import { cardOf, type PlayerView, PALETTES } from '@school-days/shared';
 import { useStore } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
 import { HelpScreen } from './HelpScreen.tsx';
+import { FontSelect } from './FontSelect.tsx';
 import styles from './CharacterSelect.module.css';
 
 export function CharacterSelect({ view }: { view: PlayerView }) {
-  const { sendAction, leave, palette, refreshPalette, setPalette, background, refreshBackground } = useStore();
+  const { sendAction, leave, palette, refreshPalette, setPalette, background, refreshBackground, font } = useStore();
   const [showHelp, setShowHelp] = useState(false);
   const me = view.you;
   const self = view.players.find((p) => p.id === me);
@@ -19,6 +20,7 @@ export function CharacterSelect({ view }: { view: PlayerView }) {
   const cssVars = {
     '--bg': palette.colors.background,
     '--bg-image': `url(${background})`,
+    '--font-family': font,
     '--panel': palette.colors.panel,
     '--panel-border': palette.colors.panelBorder,
     '--primary': palette.colors.primary,
@@ -67,6 +69,7 @@ export function CharacterSelect({ view }: { view: PlayerView }) {
               </option>
             ))}
           </select>
+          <FontSelect />
           <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
             🎲
           </button>

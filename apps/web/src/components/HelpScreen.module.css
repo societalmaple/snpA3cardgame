@@ -6,6 +6,7 @@
   padding: 1.5rem;
   position: relative;
   isolation: isolate;
+  font-family: var(--font-family);
 }
 
 /* Fixed-layer background so the image never scrolls or crops on mobile. */
@@ -116,6 +117,10 @@
   align-items: center;
   gap: 0.5rem;
   align-self: flex-end;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .paletteToggle,

@@ -6,6 +6,7 @@ import { PALETTES } from '@school-days/shared';
 const STORAGE_KEY = 'school-days-session';
 const PALETTE_KEY = 'school-days-palette';
 const BACKGROUND_KEY = 'school-days-background';
+const FONT_KEY = 'school-days-font';
 
 const BASE = import.meta.env.BASE_URL;
 export const BACKGROUNDS = [
@@ -14,6 +15,19 @@ export const BACKGROUNDS = [
   `${BASE}bg3.jpg`,
   `${BASE}bg4.jpg`,
   `${BASE}bg5.jpg`,
+];
+
+export interface FontOption {
+  name: string;
+  family: string;
+}
+
+export const FONTS: FontOption[] = [
+  { name: 'System', family: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" },
+  { name: 'Verdana', family: 'Verdana, Geneva, sans-serif' },
+  { name: 'Trebuchet', family: "'Trebuchet MS', Trebuchet, sans-serif" },
+  { name: 'Arial', family: 'Arial, Helvetica, sans-serif' },
+  { name: 'OpenDyslexic', family: "'OpenDyslexic', Verdana, sans-serif" },
 ];
 
 function loadSession(): Session | null {
@@ -60,6 +74,19 @@ function saveBackground(bg: string): void {
   localStorage.setItem(BACKGROUND_KEY, bg);
 }
 
+function loadFont(): string | null {
+  try {
+    const raw = localStorage.getItem(FONT_KEY);
+    return raw && FONTS.some((f) => f.family === raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveFont(font: string): void {
+  localStorage.setItem(FONT_KEY, font);
+}
+
 interface Store {
   socket: GameSocket | null;
   connected: boolean;
@@ -69,6 +96,7 @@ interface Store {
   error: string | null;
   palette: ColorPalette;
   background: string;
+  font: string;
 
   init: () => void;
   createRoom: (name: string) => void;
@@ -81,6 +109,7 @@ interface Store {
   refreshPalette: () => void;
   setPalette: (palette: ColorPalette) => void;
   refreshBackground: () => void;
+  setFont: (font: string) => void;
 }
 
 const initialState: Omit<
@@ -96,6 +125,7 @@ const initialState: Omit<
   | 'refreshPalette'
   | 'setPalette'
   | 'refreshBackground'
+  | 'setFont'
 > = {
   socket: null,
   connected: false,
@@ -105,6 +135,7 @@ const initialState: Omit<
   error: null,
   palette: loadPalette() ?? pickRandomPalette(),
   background: loadBackground() ?? BACKGROUNDS[0]!,
+  font: loadFont() ?? FONTS[0]!.family,
 };
 
 export const useStore = create<Store>((set, get) => ({
@@ -192,5 +223,10 @@ export const useStore = create<Store>((set, get) => ({
     }
     saveBackground(next);
     set({ background: next });
+  },
+
+  setFont: (font: string) => {
+    saveFont(font);
+    set({ font });
   },
 }));

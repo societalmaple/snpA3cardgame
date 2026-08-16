@@ -12,6 +12,7 @@
   padding: 1.5rem;
   position: relative;
   isolation: isolate;
+  font-family: var(--font-family);
 }
 
 /* Fixed-layer background so the image never scrolls or crops on mobile. */
@@ -55,6 +56,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
+  min-width: 0;
 }
 .paletteSelect {
   padding: 0.85rem 2.5rem 0.85rem 1.2rem;
