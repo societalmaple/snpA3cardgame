@@ -1,11 +1,11 @@
 .select {
-  padding: 0.7rem 1.9rem 0.7rem 1rem;
+  padding: 0.65rem 1.8rem 0.65rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid var(--panel-border);
   background: var(--panel);
   color: var(--text-primary);
   font: inherit;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
