@@ -1,8 +1,10 @@
 .wrap {
   min-height: 100vh;
+  min-height: 100svh;
   min-height: 100dvh;
   display: grid;
   place-items: center;
+  overflow-y: auto;
   padding: 1.5rem;
   position: relative;
   isolation: isolate;
@@ -119,6 +121,7 @@
 .panel {
   position: relative;
   z-index: 1;
+  margin: auto;
   width: min(24rem, 100%);
   display: flex;
   flex-direction: column;
