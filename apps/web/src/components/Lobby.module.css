@@ -313,6 +313,21 @@
     width: 3.2rem;
     height: 3.2rem;
   }
+  .row {
+    gap: 0.4rem;
+    min-width: 0;
+  }
+  .row .input {
+    min-width: 0;
+    padding: 0.5rem 0.6rem;
+    letter-spacing: 0.1em;
+    font-size: 0.95rem;
+  }
+  .row .secondary {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
 }
 
 /* Short, landscape phones: keep the corner buttons clear of the centered panel. */
