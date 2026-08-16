@@ -70,10 +70,10 @@ export function Lobby() {
       <div className={styles.wrap} style={cssVars}>
         <div className={styles.overlay} />
         <div className={styles.topbar}>
-          <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
-            ?
-          </button>
-          <div className={styles.paletteSelector}>
+          <div className={styles.paletteRow}>
+            <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
+              ?
+            </button>
             <select
               value={palette.name}
               onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
@@ -86,10 +86,12 @@ export function Lobby() {
                 </option>
               ))}
             </select>
-            <FontSelect />
             <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
               🎲
             </button>
+          </div>
+          <div className={styles.paletteRow}>
+            <FontSelect />
             <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
               🖼️
             </button>
@@ -143,38 +145,34 @@ export function Lobby() {
     <div className={styles.wrap} style={cssVars}>
       <div className={styles.overlay} />
       <div className={styles.topbar}>
-        <div className={styles.topLeft}>
+        <div className={styles.paletteRow}>
           <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
             ?
+          </button>
+          <select
+            value={palette.name}
+            onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+            className={styles.paletteSelect}
+            aria-label="Select color palette"
+          >
+            {PALETTES.map((p) => (
+              <option key={p.name} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+            🎲
           </button>
           <button className={styles.leave} onClick={leave}>
             Leave room
           </button>
         </div>
-        <div className={styles.paletteSelector}>
-          <div className={styles.paletteRow}>
-            <select
-              value={palette.name}
-              onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
-              className={styles.paletteSelect}
-              aria-label="Select color palette"
-            >
-              {PALETTES.map((p) => (
-                <option key={p.name} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
-              🎲
-            </button>
-          </div>
-          <div className={styles.paletteRow}>
-            <FontSelect />
-            <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
-              🖼️
-            </button>
-          </div>
+        <div className={styles.paletteRow}>
+          <FontSelect />
+          <button className={styles.bgBtn} onClick={refreshBackground} aria-label="Randomize background" title="Randomize background">
+            🖼️
+          </button>
         </div>
       </div>
       {showMenu && <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />}
