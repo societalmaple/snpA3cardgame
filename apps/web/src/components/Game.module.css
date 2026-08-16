@@ -515,6 +515,11 @@
   .paletteSelector {
     flex-basis: 100%;
     justify-content: center;
+    gap: 0.4rem;
+  }
+  .paletteSelect {
+    font-size: 1rem;
+    padding: 0.55rem 1.9rem 0.55rem 0.9rem;
   }
   .leave,
   .tutorialBtn {
@@ -522,9 +527,16 @@
     font-size: 1.15rem;
     min-height: 3rem;
   }
-  .helpBtn,
-  .randomizeBtn {
-    min-height: 3rem;
+  .helpBtn {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.9rem;
+  }
+  .randomizeBtn,
+  .bgBtn {
+    width: 2.6rem;
+    height: 2.6rem;
+    font-size: 1.5rem;
   }
   .cardRow {
     flex-wrap: nowrap;
