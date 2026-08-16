@@ -143,10 +143,55 @@ export class RoomManager {
         m.connected = false;
         m.socketId = null;
         if (room.game) room.game = setConnected(room.game, m.playerId, false);
+        this.endIfAbandoned(room);
         return room;
       }
     }
     return null;
+  }
+
+  /** Hard leave: removes the member from the room entirely (Leave buttons). */
+  leaveRoom(socketId: string): Room | null {
+    for (const room of this.rooms.values()) {
+      const m = room.members.find((x) => x.socketId === socketId);
+      if (m) {
+        this.removeMember(room, m.playerId);
+        this.endIfAbandoned(room);
+        return room;
+      }
+    }
+    return null;
+  }
+
+  private removeMember(room: Room, playerId: string): void {
+    room.members = room.members.filter((m) => m.playerId !== playerId);
+    if (room.members.length === 0) {
+      this.rooms.delete(room.code);
+      return;
+    }
+    this.reassignHost(room);
+  }
+
+  /** If the host is gone, promote the first still-connected member. */
+  private reassignHost(room: Room): void {
+    if (room.members.some((m) => m.playerId === room.hostId && m.connected)) return;
+    const next = room.members.find((m) => m.connected);
+    if (next) room.hostId = next.playerId;
+  }
+
+  /**
+   * A game needs MIN_PLAYERS connected players to remain playable. When drops leave
+   * fewer than that, abandon the game and send whoever is left back to the lobby.
+   * Offline members are dropped so the room can be restarted cleanly.
+   */
+  private endIfAbandoned(room: Room): void {
+    if (room.phase !== 'in_game') return;
+    if (room.members.filter((m) => m.connected).length >= MIN_PLAYERS) return;
+    room.game = null;
+    room.phase = 'lobby';
+    room.members = room.members.filter((m) => m.connected);
+    room.members.forEach((m) => (m.ready = false));
+    this.reassignHost(room);
   }
 
   private member(code: string, playerId: string): RoomMember | undefined {

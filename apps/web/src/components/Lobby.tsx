@@ -56,42 +56,39 @@ export function Lobby() {
     '--player-item-border': palette.colors.playerItemBorder,
   } as React.CSSProperties;
 
+  // Help/Tutorial open as full-screen overlays so the layout below never shifts.
+  if (showHelp) return <HelpScreen onClose={() => setShowHelp(false)} />;
+  if (showTutorial) return <Tutorial onClose={() => setShowTutorial(false)} />;
+
   // Not in a room yet → create / join form.
   if (!room || !session) {
     return (
       <div className={styles.wrap} style={cssVars}>
-        {!showHelp && !showTutorial && <div className={styles.overlay} />}
-        <div className={styles.paletteSelector}>
-          <select
-            value={palette.name}
-            onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
-            className={styles.paletteSelect}
-            aria-label="Select color palette"
-          >
-            {PALETTES.map((p) => (
-              <option key={p.name} value={p.name}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-          <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
-            🎲
-          </button>
-        </div>
-        <div className={styles.topRight}>
+        <div className={styles.overlay} />
+        <div className={styles.topbar}>
           <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
             ?
           </button>
+          <div className={styles.paletteSelector}>
+            <select
+              value={palette.name}
+              onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+              className={styles.paletteSelect}
+              aria-label="Select color palette"
+            >
+              {PALETTES.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+              🎲
+            </button>
+          </div>
         </div>
-        {showMenu && !showHelp && !showTutorial && (
-          <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />
-        )}
-        {showHelp ? (
-          <HelpScreen onClose={() => setShowHelp(false)} />
-        ) : showTutorial ? (
-          <Tutorial onClose={() => setShowTutorial(false)} />
-        ) : (
-          <div className={styles.panel}>
+        {showMenu && <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />}
+        <div className={styles.panel}>
           <h1 className={styles.title}>Solve It!</h1>
           <p className={styles.sub}>Online card game for {MIN_PLAYERS}–{MAX_PLAYERS} players</p>
 
@@ -123,9 +120,8 @@ export function Lobby() {
             </button>
           </div>
 
-{!connected && <p className={styles.warn}>Connecting to server…</p>}
-            </div>
-        )}
+          {!connected && <p className={styles.warn}>Connecting to server…</p>}
+        </div>
       </div>
     );
   }
@@ -137,38 +133,36 @@ export function Lobby() {
 
   return (
     <div className={styles.wrap} style={cssVars}>
-      {!showHelp && !showTutorial && <div className={styles.overlay} />}
-      <div className={styles.paletteSelector}>
-        <select
-          value={palette.name}
-          onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
-          className={styles.paletteSelect}
-          aria-label="Select color palette"
-        >
-          {PALETTES.map((p) => (
-            <option key={p.name} value={p.name}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-        <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
-          🎲
-        </button>
+      <div className={styles.overlay} />
+      <div className={styles.topbar}>
+        <div className={styles.topLeft}>
+          <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
+            ?
+          </button>
+          <button className={styles.leave} onClick={leave}>
+            Leave room
+          </button>
+        </div>
+        <div className={styles.paletteSelector}>
+          <select
+            value={palette.name}
+            onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+            className={styles.paletteSelect}
+            aria-label="Select color palette"
+          >
+            {PALETTES.map((p) => (
+              <option key={p.name} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+            🎲
+          </button>
+        </div>
       </div>
-      <div className={styles.topRight}>
-        <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
-          ?
-        </button>
-      </div>
-      {showMenu && !showHelp && !showTutorial && (
-        <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />
-      )}
-      {showHelp ? (
-        <HelpScreen onClose={() => setShowHelp(false)} />
-      ) : showTutorial ? (
-        <Tutorial onClose={() => setShowTutorial(false)} />
-      ) : (
-        <div className={styles.panel}>
+      {showMenu && <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />}
+      <div className={styles.panel}>
         <h1 className={styles.title}>Room {room.code}</h1>
         <p className={styles.sub}>Share this code so friends can join.</p>
 
@@ -197,12 +191,7 @@ export function Lobby() {
         {isHost && !canStart && (
           <p className={styles.hint}>Need {MIN_PLAYERS}–{MAX_PLAYERS} players, everyone ready.</p>
         )}
-
-        <button className={styles.ghost} onClick={leave}>
-          Leave room
-        </button>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

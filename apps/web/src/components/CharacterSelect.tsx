@@ -6,11 +6,15 @@ import { HelpScreen } from './HelpScreen.tsx';
 import styles from './CharacterSelect.module.css';
 
 export function CharacterSelect({ view }: { view: PlayerView }) {
-  const { sendAction, palette, refreshPalette, setPalette } = useStore();
+  const { sendAction, leave, palette, refreshPalette, setPalette } = useStore();
   const [showHelp, setShowHelp] = useState(false);
   const me = view.you;
   const self = view.players.find((p) => p.id === me);
   const chosen = self?.characterId ?? null;
+
+  const confirmLeave = () => {
+    if (window.confirm('Leave the room? You will give up your seat in this game.')) leave();
+  };
 
   const cssVars = {
     '--bg': palette.colors.background,
@@ -35,30 +39,38 @@ export function CharacterSelect({ view }: { view: PlayerView }) {
     '--player-item-border': palette.colors.playerItemBorder,
   } as React.CSSProperties;
 
+  if (showHelp) return <HelpScreen onClose={() => setShowHelp(false)} />;
+
   return (
     <div className={styles.wrap} style={cssVars}>
       <div className={styles.overlay} />
-      <div className={styles.paletteSelector}>
-        <select
-          value={palette.name}
-          onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
-          className={styles.paletteSelect}
-          aria-label="Select color palette"
-        >
-          {PALETTES.map((p) => (
-            <option key={p.name} value={p.name}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-        <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
-          🎲
-        </button>
+      <div className={styles.topbar}>
+        <div className={styles.topLeft}>
+          <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play">
+            ?
+          </button>
+          <button className={styles.leave} onClick={confirmLeave}>
+            Leave to lobby
+          </button>
+        </div>
+        <div className={styles.paletteSelector}>
+          <select
+            value={palette.name}
+            onChange={(e) => setPalette(PALETTES.find((p) => p.name === e.target.value)!)}
+            className={styles.paletteSelect}
+            aria-label="Select color palette"
+          >
+            {PALETTES.map((p) => (
+              <option key={p.name} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <button className={styles.randomizeBtn} onClick={refreshPalette} aria-label="Randomize palette">
+            🎲
+          </button>
+        </div>
       </div>
-      {showHelp && <HelpScreen onClose={() => setShowHelp(false)} />}
-      <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play">
-        ?
-      </button>
       <div className={styles.panel}>
         <h1 className={styles.title}>Choose your character</h1>
         <p className={styles.sub}>

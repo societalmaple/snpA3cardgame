@@ -109,7 +109,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('room:leave', () => {
-    const room = manager.disconnectSocket(socket.id);
+    const room = manager.leaveRoom(socket.id);
     socket.data.code = undefined;
     socket.data.playerId = undefined;
     if (room) {

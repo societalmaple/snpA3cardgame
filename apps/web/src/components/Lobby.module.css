@@ -3,8 +3,10 @@
   min-height: 100svh;
   min-height: 100dvh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
@@ -30,11 +32,24 @@
   pointer-events: none;
 }
 
+/* In-flow top bar; nothing floats over the panel on any screen size. */
+.topbar {
+  position: relative;
+  z-index: 1;
+  width: min(24rem, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.topLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .paletteSelector {
-  position: fixed;
-  top: max(1rem, env(safe-area-inset-top));
-  right: 1rem;
-  z-index: 10;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -87,16 +102,6 @@
   color: var(--accent);
 }
 
-.topRight {
-  position: fixed;
-  top: max(1rem, env(safe-area-inset-top));
-  left: 1rem;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .helpBtn {
   width: 4.35rem;
   height: 4.35rem;
@@ -121,10 +126,28 @@
   color: var(--accent);
 }
 
+.leave {
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--panel-border);
+  background: var(--ghost);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.leave:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  background: var(--ghost-hover);
+}
+
 .panel {
   position: relative;
   z-index: 1;
-  margin: auto;
   width: min(24rem, 100%);
   display: flex;
   flex-direction: column;
@@ -302,15 +325,9 @@
   .panel {
     padding: 1.25rem;
   }
-  .paletteSelector {
-    right: 0.75rem;
-  }
   .paletteSelect {
     font-size: 1rem;
     padding: 0.55rem 1.9rem 0.55rem 0.9rem;
-  }
-  .topRight {
-    left: 0.75rem;
   }
   .helpBtn {
     width: 3.5rem;
@@ -335,12 +352,5 @@
     padding: 0.5rem 0.75rem;
     font-size: 0.95rem;
     white-space: nowrap;
-  }
-}
-
-/* Short, landscape phones: keep the corner buttons clear of the centered panel. */
-@media (max-width: 640px) and (max-height: 560px) {
-  .panel {
-    margin-top: 4rem;
   }
 }
