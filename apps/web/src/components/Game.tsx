@@ -122,7 +122,7 @@ export function Game({ view }: { view: PlayerView }) {
         </div>
       </header>
 
-      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} onBoard />}
 
       {winner && (
         <div className={styles.banner}>

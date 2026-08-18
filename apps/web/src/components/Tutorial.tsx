@@ -114,7 +114,7 @@ interface Rect {
   height: number;
 }
 
-export function Tutorial({ onClose }: { onClose: () => void }) {
+export function Tutorial({ onClose, onBoard = false }: { onClose: () => void; onBoard?: boolean }) {
   const { palette, background, font } = useStore();
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
@@ -231,6 +231,9 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
             {index + 1}. {step.title}
           </h2>
           <p className={styles.body}>{step.body}</p>
+          {!onBoard && index < 6 && (
+            <p className={styles.tip}>💡 Tip: start a game and open this tour there — it highlights each part in its exact spot on the board.</p>
+          )}
           {step.cardIds && (
             <div className={styles.cards}>
               {step.cardIds.map((id) => (
