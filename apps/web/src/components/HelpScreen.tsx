@@ -47,10 +47,10 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
           <section>
             <h2>The Big Idea</h2>
             <p>
-              People have different ways of thinking and functioning. <strong>Difficulties come from a mismatch
-              between a person and their environment</strong>, not from being less capable. In this game you solve
-              Situations by using strengths, supports, self-advocacy, relationships, and environmental changes to
-              create conditions in which you can thrive.
+              People think and work in different ways. <strong>Difficulties come from a mismatch between a person
+              and their environment</strong>, not from being less capable. In this game you solve Situations by using
+              strengths, supports, self-advocacy, relationships, and environmental changes to create conditions in
+              which you can thrive.
             </p>
           </section>
 
@@ -58,8 +58,7 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
             <h2>Goal</h2>
             <p>
               Be the first player to reach <strong>Well-Being Level {TARGET_LEVEL}</strong>. The winning level must
-              come from successfully solving a Situation. Well-being can come from supportive environments,
-              relationships, strategies, and self-acceptance, not only from performing better.
+              come from successfully solving a Situation.
             </p>
           </section>
 
@@ -96,7 +95,7 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
             </ul>
             <p>
               The screen shows <strong>your approach</strong> and the <strong>modified difficulty</strong>. These are
-              <em> different valid solutions</em>, not a hidden correct answer.
+              different valid solutions, not a hidden correct answer.
             </p>
           </section>
 

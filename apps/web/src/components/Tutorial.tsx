@@ -1,144 +1,120 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore, fontScaleOf } from '../store.ts';
-import { PlaceholderCard } from './PlaceholderCard.tsx';
-import { TARGET_LEVEL, MAX_SUPPORTS, HAND_LIMIT } from '@school-days/shared';
+import { TARGET_LEVEL, HAND_LIMIT } from '@school-days/shared';
 import styles from './Tutorial.module.css';
 
 interface Step {
   title: string;
   body: string;
-  cardId?: string;
-  tip?: string;
+  /** data-tutorial zone on the game screen to spotlight; 'page' means the whole screen. */
+  zone: string;
 }
 
 const STEPS: Step[] = [
   {
     title: 'Welcome to Solve It!',
     body:
-      'This game is about a strengths-based view of neurodiversity. People think and work in different ways, and ' +
-      'hard things often happen when a person and their surroundings do not fit together. That is not about being ' +
-      'less capable. You win by changing the conditions so you can do your best.',
-    cardId: 'sit-01',
-    tip: 'Different approaches work in different settings. There is no one "correct" way to learn, talk, or feel.',
+      `Race other players to Well-Being Level ${TARGET_LEVEL}. The level that wins must come from solving a ` +
+      'Situation. This short tour points at each part of the screen.',
+    zone: 'page',
   },
   {
-    title: 'Goal',
+    title: 'Top bar',
     body:
-      `Be the first player to reach Well-Being Level ${TARGET_LEVEL}. The level that wins must come from solving a ` +
-      'Situation. Well-being grows from supportive places, good relationships, and strategies, not just from doing better.',
+      'Room code, turn number, and whose turn it is. The "Tutorial" button reopens this tour, and "?" opens the ' +
+      'full written rules.',
+    zone: 'topbar',
   },
   {
-    title: 'Choose a Character',
-    body:
-      'At the start, each player picks a unique Character. Your Character gives you a steady ability that fits the ' +
-      'game, like an extra way to solve a Situation when it matches your strengths, or helping someone else pick an ' +
-      'environmental solution.',
-    cardId: 'char-01',
-    tip: 'Characters are never thrown away, and each one is used by only one player.',
+    title: 'Opponents',
+    body: "Everyone else's name, level, and what they hold. The active player is highlighted.",
+    zone: 'opponents',
   },
   {
-    title: 'Your Turn',
+    title: 'Action area',
     body:
-      'On your turn you draw a Situation, try to solve it, then play or equip cards and end your turn. If you draw a ' +
-      'Mess-Up, it sets up a barrier you can usually remove.',
+      'This is the heart of your turn. Read the instruction at the top, then use the buttons to draw a Situation, ' +
+      'Resolve, or End your turn. Situations and their difficulty show up here.',
+    zone: 'center',
   },
   {
-    title: 'Situations & Barriers',
+    title: 'Your cards',
     body:
-      'Every Situation has a base difficulty and one or more barriers, like noise, crowding, time pressure, unclear ' +
-      'instructions, too much input, or social pressure. A barrier is not your fault. It means the setting does not ' +
-      'fit you yet.',
-    cardId: 'sit-02',
-    tip: 'The screen shows "your approach" and the "modified difficulty". These are different good ways to win, not a hidden answer.',
+      `Your equipped cards and your two hands (Situation and Experience). You can hold up to ${HAND_LIMIT} cards. ` +
+      'Click a highlighted card to play it.',
+    zone: 'self',
   },
   {
-    title: 'Multiple Ways to Solve',
-    body:
-      'You can solve a Situation in more than one way: a matching Strength, an active Support, a Self-Advocacy card, ' +
-      'a Friend, a Club, changing the environment, or working with a teammate. You are never told to just "try harder."',
-    cardId: 'sit-06',
+    title: 'Game log',
+    body: 'A running record of everything that just happened in the game.',
+    zone: 'log',
   },
   {
-    title: 'Strengths',
+    title: "You're ready!",
     body:
-      'Strengths give a small base bonus PLUS a context bonus, so they work best when they fit the Situation. ' +
-      'Linguistic helps with explaining and writing; Logical-Mathematical with planning and steps; Spatial with ' +
-      'diagrams and order; and so on. Strengths are used up when you solve a Situation.',
-    cardId: 'str-01',
-    tip: 'A Strength is not good everywhere. Its value comes from finding the right place for it.',
-  },
-  {
-    title: 'Supports & Accommodations',
-    body:
-      `Supports are tools, accommodations, or changes to the environment that remove barriers. You can keep up to ` +
-      `${MAX_SUPPORTS} active at once. Quiet Workspace helps with noise, Written Instructions helps with unclear ` +
-      `directions, Extra Processing Time helps with time pressure. Supports are NOT "power-ups". They change the ` +
-      'setting so the abilities you already have can be used.',
-    cardId: 'sup-03',
-    tip: 'Getting information in a different way does not mean you understand less.',
-  },
-  {
-    title: 'Self-Advocacy',
-    body:
-      'Self-Advocacy cards are one-shot cards you play while facing a Situation. Asking for help is a skill, not a ' +
-      'weakness: "Can I Have That in Writing?", "I Need More Processing Time", "Can We Change the Environment?" These ' +
-      'cards lower the difficulty of matching barriers or cancel a consequence.',
-    cardId: 'sad-01',
-    tip: 'Telling others what you need helps everyone help you succeed.',
-  },
-  {
-    title: 'Friends & Clubs',
-    body:
-      'Friends help with co-regulation and teamwork: the Active Listener clears up communication, the Detail Checker ' +
-      'spots unclear requirements, the Study Partner breaks big tasks into small ones, the Calm Anchor eases stress. ' +
-      'Clubs are caring communities that help you find places where your strengths are useful.',
-    cardId: 'fnd-03',
-  },
-  {
-    title: 'Mess-Ups Are Barriers, Not Failures',
-    body:
-      'When you draw a Mess-Up, the setting threw up a barrier, like Sensory Overload Spot, Unexpected Routine ' +
-      'Change, Miscommunication Glitch, Burnout, or Lost Accommodation. You can usually MITIGATE it with a Support, ' +
-      'Self-Advocacy card, Strength, or Friend. If you cannot, you only get a small, temporary penalty for the next ' +
-      'Situation, never a permanent loss.',
-    cardId: 'msu-02',
-    tip: 'Needing rest does not lower your worth. Losing a support creates a barrier, and the lesson is about access.',
-  },
-  {
-    title: 'Help & Teamwork',
-    body:
-      'During a Situation you can ask one other player for help. Their strengths and supports can also change the ' +
-      'conditions, and Experience rewards can be shared. Working together lets different strengths add to each other.',
-    cardId: 'sit-04',
-  },
-  {
-    title: 'Discovery',
-    body:
-      'When you solve a Situation using a matching Strength, Support, or Self-Advocacy approach, you may discover a ' +
-      'new approach (an extra Experience card). It is never a random "superpower" given to your neurotype. It means ' +
-      '"here is one thing that worked for me."',
-  },
-  {
-    title: 'Hand Limit & Discarding',
-    body:
-      `You can hold up to ${HAND_LIMIT} cards across your two hands. If you go over, you discard down and choose what ` +
-      'to keep. If a consequence asks you to discard, you can pay from your hand or from equipped cards.',
-  },
-  {
-    title: 'You are ready!',
-    body:
-      'Keep these ideas in mind: strengths and difficulties can exist together; a difficulty is not a lack of ' +
-      'ability; changing the environment can remove a barrier; accommodations give access, not an unfair edge; ' +
-      'self-advocacy is a skill; different people solve the same problem in different ways; and there is no one ' +
-      'right way to function. Have fun, and help each other thrive!',
-    tip: 'You can reopen this tutorial anytime with the "?" button.',
+      'On your turn: draw a Situation, lower its difficulty with your cards, then Resolve. Mess-Ups are just ' +
+      'barriers you can fix. Full details live behind "?". Have fun!',
+    zone: 'page',
   },
 ];
+
+interface Rect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
 
 export function Tutorial({ onClose }: { onClose: () => void }) {
   const { palette, background, font } = useStore();
   const [index, setIndex] = useState(0);
+  const [rect, setRect] = useState<Rect | null>(null);
   const step = STEPS[index]!;
+  const isPage = step.zone === 'page';
+
+  useEffect(() => {
+    const measure = () => {
+      if (isPage) {
+        setRect(null);
+        return;
+      }
+      const el = document.querySelector<HTMLElement>(`[data-tutorial="${step.zone}"]`);
+      if (!el) {
+        setRect(null);
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      setRect({ left: r.left, top: r.top, width: r.width, height: r.height });
+    };
+
+    if (!isPage) {
+      document.querySelector<HTMLElement>(`[data-tutorial="${step.zone}"]`)?.scrollIntoView({ block: 'center', inline: 'nearest' });
+    }
+    measure();
+    const onScroll = () => measure();
+    const onResize = () => measure();
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onResize);
+    let ro: ResizeObserver | undefined;
+    const target = document.querySelector<HTMLElement>(`[data-tutorial="${step.zone}"]`);
+    if (target && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => measure());
+      ro.observe(target);
+    }
+    return () => {
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onResize);
+      ro?.disconnect();
+    };
+  }, [step.zone, isPage]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
 
   const cssVars = {
     '--bg': palette.colors.background,
@@ -168,11 +144,25 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
 
   const isFirst = index === 0;
   const isLast = index === STEPS.length - 1;
+  const centered = isPage || !rect;
+
+  const spotStyle =
+    rect && !isPage
+      ? { left: rect.left - 6, top: rect.top - 6, width: rect.width + 12, height: rect.height + 12 }
+      : undefined;
+
+  const tooltipStyle = centered ? undefined : tooltipStyleFor(rect);
 
   return (
-    <div className={styles.wrap} style={cssVars}>
-      <div className={styles.overlay} />
-      <div className={styles.panel}>
+    <div
+      className={styles.wrap}
+      style={cssVars}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Tutorial step ${index + 1}: ${step.title}`}
+    >
+      {isPage ? <div className={styles.dim} /> : rect ? <div className={styles.spot} style={spotStyle} /> : null}
+      <div className={`${styles.tooltip} ${centered ? styles.centered : styles.anchored}`} style={tooltipStyle}>
         <header className={styles.header}>
           <h1 className={styles.title}>Interactive Tutorial</h1>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close tutorial">
@@ -180,29 +170,11 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
           </button>
         </header>
 
-        <div className={styles.progress}>
-          {STEPS.map((s, i) => (
-            <button
-              key={i}
-              className={`${styles.dot} ${i === index ? styles.dotActive : ''} ${i < index ? styles.dotDone : ''}`}
-              onClick={() => setIndex(i)}
-              aria-label={`Step ${i + 1}: ${s.title}`}
-              title={s.title}
-            />
-          ))}
-        </div>
-
         <div className={styles.content}>
           <h2 className={styles.stepTitle}>
             {index + 1}. {step.title}
           </h2>
           <p className={styles.body}>{step.body}</p>
-          {step.cardId && (
-            <div className={styles.cardWrap}>
-              <PlaceholderCard id={step.cardId} size="md" />
-            </div>
-          )}
-          {step.tip && <p className={styles.tip}>💡 {step.tip}</p>}
         </div>
 
         <footer className={styles.footer}>
@@ -213,11 +185,11 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
             {index + 1} / {STEPS.length}
           </span>
           {isLast ? (
-            <button className={styles.primary} onClick={onClose}>
+            <button className={styles.primary} onClick={onClose} autoFocus>
               Start playing
             </button>
           ) : (
-            <button className={styles.primary} onClick={() => setIndex(index + 1)}>
+            <button className={styles.primary} onClick={() => setIndex(index + 1)} autoFocus>
               Next →
             </button>
           )}
@@ -225,4 +197,25 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
+}
+
+function tooltipStyleFor(rect: Rect): React.CSSProperties {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  if (vw < 640) {
+    return { left: 12, right: 12, bottom: 12, width: 'auto' };
+  }
+
+  const width = Math.min(24 * 16, vw - 32);
+  const estimate = 230;
+  const rectBottom = rect.top + rect.height;
+  let top = rectBottom + 16;
+  if (top + estimate > vh - 16 && rect.top - estimate - 16 > 16) {
+    top = Math.max(16, rect.top - estimate - 16);
+  } else {
+    top = Math.min(top, vh - estimate - 16);
+  }
+  const left = Math.min(Math.max(16, rect.left), vw - width - 16);
+  return { left, top, width };
 }

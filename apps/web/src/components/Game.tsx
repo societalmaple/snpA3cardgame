@@ -90,9 +90,9 @@ export function Game({ view }: { view: PlayerView }) {
   } as React.CSSProperties;
 
   return (
-    <div className={styles.page} style={cssVars}>
+    <div className={styles.page} style={cssVars} data-tutorial="page">
       <div className={styles.overlay} />
-      <header className={styles.topbar}>
+      <header className={styles.topbar} data-tutorial="topbar">
         <div>
           <strong>Solve It!</strong> · Room {room?.code} · Turn {view.turn}
         </div>
@@ -146,7 +146,7 @@ export function Game({ view }: { view: PlayerView }) {
         </div>
       )}
 
-      <section className={styles.opponents}>
+      <section className={styles.opponents} data-tutorial="opponents">
         {opponents.map((p) => (
           <div key={p.id} className={`${styles.opponent} ${p.id === view.currentPlayerId ? styles.active : ''}`}>
             <div className={styles.oHead}>
@@ -166,7 +166,7 @@ export function Game({ view }: { view: PlayerView }) {
       </section>
 
       <main className={styles.board}>
-        <div className={styles.center}>
+        <div className={styles.center} data-tutorial="center">
           <p className={styles.prompt}>{prompt}</p>
 
           {view.activeSituation && (
@@ -324,7 +324,7 @@ export function Game({ view }: { view: PlayerView }) {
           )}
         </div>
 
-        <aside className={styles.log}>
+        <aside className={styles.log} data-tutorial="log">
           <h3>Game log</h3>
           <ul>
             {view.log.slice(-5).map((e) => (
@@ -335,7 +335,7 @@ export function Game({ view }: { view: PlayerView }) {
       </main>
 
       {/* ── Your area ── */}
-      <section className={styles.self}>
+      <section className={styles.self} data-tutorial="self">
         <div className={styles.selfHead}>
           <span className={styles.oName}>{self?.name} (you)</span>
           <span className={styles.level}>Lv {self?.level}</span>

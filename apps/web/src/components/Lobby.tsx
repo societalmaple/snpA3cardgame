@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { MIN_PLAYERS, MAX_PLAYERS, PALETTES } from '@school-days/shared';
 import { useStore, fontScaleOf } from '../store.ts';
 import { HelpScreen } from './HelpScreen.tsx';
-import { Tutorial } from './Tutorial.tsx';
-import { HelpMenu } from './HelpMenu.tsx';
 import { FontSelect } from './FontSelect.tsx';
 import styles from './Lobby.module.css';
 
@@ -11,28 +9,9 @@ export function Lobby() {
   const { room, session, connected, createRoom, joinRoom, setReady, startGame, leave, palette, refreshPalette, setPalette, background, refreshBackground, font } = useStore();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
-  const [showMenu, setShowMenu] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
 
-  const toggleMenu = () => {
-    if (showHelp || showTutorial) {
-      setShowHelp(false);
-      setShowTutorial(false);
-    } else {
-      setShowMenu((open) => !open);
-    }
-  };
-  const openTutorial = () => {
-    setShowMenu(false);
-    setShowHelp(false);
-    setShowTutorial(true);
-  };
-  const openHelp = () => {
-    setShowMenu(false);
-    setShowTutorial(false);
-    setShowHelp(true);
-  };
+  const toggleHelp = () => setShowHelp((open) => !open);
 
   const cssVars = {
     '--bg': palette.colors.background,
@@ -60,9 +39,8 @@ export function Lobby() {
     '--player-item-border': palette.colors.playerItemBorder,
   } as React.CSSProperties;
 
-  // Help/Tutorial open as full-screen overlays so the layout below never shifts.
+  // Help opens as a full-screen overlay so the layout below never shifts.
   if (showHelp) return <HelpScreen onClose={() => setShowHelp(false)} />;
-  if (showTutorial) return <Tutorial onClose={() => setShowTutorial(false)} />;
 
   // Not in a room yet → create / join form.
   if (!room || !session) {
@@ -71,7 +49,7 @@ export function Lobby() {
         <div className={styles.overlay} />
         <div className={styles.topbar}>
           <div className={styles.paletteRow}>
-            <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
+            <button className={styles.helpBtn} onClick={toggleHelp} aria-label="How to play" title="How to play">
               ?
             </button>
             <select
@@ -97,7 +75,6 @@ export function Lobby() {
             </button>
           </div>
         </div>
-        {showMenu && <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />}
         <div className={styles.panel}>
           <h1 className={styles.title}>Solve It!</h1>
           <p className={styles.sub}>Online card game for {MIN_PLAYERS}–{MAX_PLAYERS} players</p>
@@ -146,7 +123,7 @@ export function Lobby() {
       <div className={styles.overlay} />
       <div className={styles.topbar}>
         <div className={styles.paletteRow}>
-          <button className={styles.helpBtn} onClick={toggleMenu} aria-label="How to play" title="How to play">
+          <button className={styles.helpBtn} onClick={toggleHelp} aria-label="How to play" title="How to play">
             ?
           </button>
           <select
@@ -175,7 +152,6 @@ export function Lobby() {
           </button>
         </div>
       </div>
-      {showMenu && <HelpMenu onTutorial={openTutorial} onHelp={openHelp} onClose={() => setShowMenu(false)} />}
       <div className={styles.panel}>
         <h1 className={styles.title}>Room {room.code}</h1>
         <p className={styles.sub}>Share this code so friends can join.</p>
