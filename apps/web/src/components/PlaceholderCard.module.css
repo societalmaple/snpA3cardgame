@@ -13,8 +13,18 @@
   font: inherit;
   /* Wider fonts (OpenDyslexic) scale card text down so it keeps its layout. */
   font-size: calc(1rem * var(--font-scale, 1));
-  overflow-wrap: break-word;
+  /* Allow the card to shrink inside a row and always wrap text within it. */
+  min-width: 0;
+  /* "anywhere" also affects min-content sizing, so wide text never forces the
+     card wider than its fixed width. */
+  overflow-wrap: anywhere;
   cursor: default;
+}
+
+/* Text rows are column-flex items too; let them shrink so they wrap inside the
+   card instead of running off its edges (matters for wider fonts like OpenDyslexic). */
+.card > * {
+  min-width: 0;
 }
 
 .sm {
@@ -158,6 +168,9 @@
   .card {
     width: 7.5rem;
     min-height: 9.75rem;
+    /* Cards are narrower on small screens; scale text down a touch more so
+       wider fonts (OpenDyslexic) still fit inside the card. */
+    font-size: calc(1rem * var(--font-scale, 1) * 0.9);
   }
   .sm {
     width: 5.5rem;
