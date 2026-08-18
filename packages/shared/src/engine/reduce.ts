@@ -135,7 +135,7 @@ function startSituation(state: GameState, cardId: CardInstanceId, fromDeck: bool
       tempPenalty,
     },
     phase: 'combat',
-    turnFlags: { enteredCombatThisTurn: true },
+    turnFlags: { ...s.turnFlags, enteredCombatThisTurn: true },
   };
 }
 
@@ -215,7 +215,7 @@ function advanceTurn(state: GameState): GameState {
     pendingHelp: null,
     resumeAfterDiscard: null,
     discardTask: null,
-    turnFlags: { enteredCombatThisTurn: false },
+    turnFlags: { enteredCombatThisTurn: false, askedHelpThisTurn: false },
   };
 }
 
@@ -433,6 +433,7 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
       if (state.phase !== 'combat') return fail('You can only ask for help during combat.');
       if (!state.activeSituation) return fail('No active Situation.');
       if (state.activeSituation.helperId) return fail('You already have a helper.');
+      if (state.turnFlags.askedHelpThisTurn) return fail('You can only ask for help once per turn.');
       if (action.helperId === action.playerId) return fail('You cannot ask yourself.');
       if (action.offeredExperience < 0) return fail('Offer cannot be negative.');
       const helper = findPlayer(state, action.helperId);
@@ -441,6 +442,7 @@ export function applyAction(state: GameState, action: Action): ReduceResult {
       const s: GameState = {
         ...state,
         phase: 'await_help',
+        turnFlags: { ...state.turnFlags, askedHelpThisTurn: true },
         pendingHelp: { requesterId: action.playerId, helperId: action.helperId, offeredExperience: action.offeredExperience },
       };
       return done(pushLog(s, `${cur.name} asks ${helper.name} for help (offering ${action.offeredExperience} Experience).`, action.playerId));
@@ -720,7 +722,7 @@ export function getLegalActions(state: GameState, playerId: PlayerId): LegalActi
       legal.unequippable = handSize(player) < HAND_LIMIT ? equippedCards(player) : [];
       const hasHelper = !!state.activeSituation?.helperId;
       legal.helpTargets = hasHelper ? [] : state.players.filter((p) => p.id !== playerId && p.connected).map((p) => p.id);
-      legal.canAskForHelp = !hasHelper && legal.helpTargets.length > 0;
+      legal.canAskForHelp = !hasHelper && !state.turnFlags.askedHelpThisTurn && legal.helpTargets.length > 0;
       legal.canResolveCombat = true;
       return legal;
     }

@@ -99,7 +99,7 @@ export interface GameState {
   nextEventId: number;
 
   /** Reset at the start of each turn. */
-  turnFlags: { enteredCombatThisTurn: boolean };
+  turnFlags: { enteredCombatThisTurn: boolean; askedHelpThisTurn: boolean };
 }
 
 export function currentPlayer(state: GameState): PlayerState {

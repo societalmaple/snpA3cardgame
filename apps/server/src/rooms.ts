@@ -36,6 +36,52 @@ type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 const ok = <T>(data: T): Result<T> => ({ ok: true, data });
 const fail = (error: string): Result<never> => ({ ok: false, error });
 
+const MAX_NAME_LENGTH = 16;
+
+/**
+ * Names are checked before they are stored: non-empty, short, and free of
+ * profanity. Terms are listed in normalized form (letter-substitution tricks
+ * like "5" for "s" are folded before matching).
+ */
+const PROFANITY: readonly string[] = [
+  'anal', 'anus', 'arse', 'arsehole', 'ass', 'asshole', 'bastard', 'bitch', 'blowjob', 'boobs',
+  'boner', 'bollocks', 'bullshit', 'clit', 'cock', 'cocksucker', 'cum', 'cunt', 'dick',
+  'dickhead', 'dildo', 'douche', 'fag', 'faggot', 'fanny', 'fuck', 'fucker', 'fucking',
+  'fucked', 'fuk', 'fck', 'fuq', 'fxck', 'gangbang', 'genitals', 'hentai', 'hoe', 'hooker',
+  'horny', 'jackass', 'jizz', 'kike', 'masturbate', 'motherfucker', 'nazi', 'nigga', 'nigger',
+  'nude', 'nudity', 'piss', 'porn', 'porno', 'prostitute', 'pussy', 'rape', 'raped', 'raping',
+  'retard', 'scrotum', 'sex', 'sexy', 'shit', 'shitty', 'slut', 'sperm', 'spic', 'tits',
+  'titty', 'twat', 'vagina', 'viagra', 'wanker', 'whore', 'wtf', 'xxx',
+];
+
+function normalizeForProfanity(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/5/g, 's')
+    .replace(/7/g, 't')
+    .replace(/[$]/g, 's')
+    .replace(/[@]/g, 'a')
+    .replace(/[^a-z0-9 ]/g, ' ');
+}
+
+function containsProfanity(name: string): boolean {
+  const normalized = normalizeForProfanity(name);
+  return PROFANITY.some((term) => new RegExp(`\\b${term}\\b`).test(normalized));
+}
+
+/** Trim + validate a display name. */
+function validateName(name: string): Result<string> {
+  const trimmed = name.trim();
+  if (!trimmed) return fail('Name is required.');
+  if (trimmed.length > MAX_NAME_LENGTH) return fail(`Name is too long (max ${MAX_NAME_LENGTH} characters).`);
+  if (containsProfanity(trimmed)) return fail('That name contains inappropriate language.');
+  return ok(trimmed);
+}
+
 /** In-memory authority for all rooms. Nothing is persisted (per the plan). */
 export class RoomManager {
   private rooms = new Map<string, Room>();
@@ -55,8 +101,9 @@ export class RoomManager {
   }
 
   createRoom(name: string): Result<{ room: Room; session: Session }> {
-    const trimmed = name.trim();
-    if (!trimmed) return fail('Name is required.');
+    const nameRes = validateName(name);
+    if (!nameRes.ok) return fail(nameRes.error);
+    const trimmed = nameRes.data;
     const code = this.freshCode();
     const playerId = randomUUID();
     const token = randomUUID();
@@ -73,9 +120,10 @@ export class RoomManager {
 
   joinRoom(code: string, name: string): Result<{ room: Room; session: Session }> {
     const room = this.rooms.get(code.toUpperCase());
-    const trimmed = name.trim();
+    const nameRes = validateName(name);
+    if (!nameRes.ok) return fail(nameRes.error);
+    const trimmed = nameRes.data;
     if (!room) return fail('Room not found.');
-    if (!trimmed) return fail('Name is required.');
     if (room.phase !== 'lobby') return fail('That game has already started.');
     if (room.members.length >= MAX_PLAYERS) return fail('Room is full.');
 

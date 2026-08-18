@@ -147,7 +147,7 @@ describe('combat and victory', () => {
       phase: 'combat',
       currentPlayerIndex: 0,
       activeSituation: { cardId: makeInstanceId('sit-01', 900), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
-      turnFlags: { enteredCombatThisTurn: true },
+      turnFlags: { enteredCombatThisTurn: true, askedHelpThisTurn: false },
       players: base.players.map((p) =>
         p.id === 'p1' ? { ...p, level: TARGET_LEVEL - 1, strengths: ['str-05__901', 'str-04__902'] } : p,
       ),
@@ -167,7 +167,7 @@ describe('combat and victory', () => {
       phase: 'combat',
       currentPlayerIndex: 0,
       activeSituation: { cardId: makeInstanceId('sit-02', 1), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
-      turnFlags: { enteredCombatThisTurn: true },
+      turnFlags: { enteredCombatThisTurn: true, askedHelpThisTurn: false },
       players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: 14, strengths: [], friendId: null, clubId: null, ...extra } : p)),
     });
 
@@ -205,7 +205,7 @@ describe('combat and victory', () => {
       phase: 'combat',
       currentPlayerIndex: 0,
       activeSituation: { cardId: makeInstanceId('sit-02', 7), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
-      turnFlags: { enteredCombatThisTurn: true },
+      turnFlags: { enteredCombatThisTurn: true, askedHelpThisTurn: false },
     };
     const asked = applyAction(s, { type: 'ASK_FOR_HELP', playerId: 'p1', helperId: 'p2', offeredExperience: 1 });
     expect(asked.ok).toBe(true);
@@ -218,6 +218,28 @@ describe('combat and victory', () => {
     expect(accepted.state.phase).toBe('combat');
     expect(accepted.state.activeSituation?.helperId).toBe('p2');
   });
+
+  it('only allows one help request per turn, even if the helper declines', () => {
+    const base = createGame([{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }, { id: 'p3', name: 'Cara' }], 616);
+    const s: GameState = {
+      ...base,
+      phase: 'combat',
+      currentPlayerIndex: 0,
+      activeSituation: { cardId: makeInstanceId('sit-02', 7), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
+      turnFlags: { enteredCombatThisTurn: true, askedHelpThisTurn: false },
+    };
+    const asked = applyAction(s, { type: 'ASK_FOR_HELP', playerId: 'p1', helperId: 'p2', offeredExperience: 1 });
+    expect(asked.ok).toBe(true);
+    if (!asked.ok) return;
+    const declined = applyAction(asked.state, { type: 'RESPOND_TO_HELP', playerId: 'p2', accept: false });
+    expect(declined.ok).toBe(true);
+    if (!declined.ok) return;
+    expect(declined.state.phase).toBe('combat');
+    expect(declined.state.turnFlags.askedHelpThisTurn).toBe(true);
+    expect(getLegalActions(declined.state, 'p1').canAskForHelp).toBe(false);
+    const again = applyAction(declined.state, { type: 'ASK_FOR_HELP', playerId: 'p1', helperId: 'p3', offeredExperience: 1 });
+    expect(again.ok).toBe(false);
+  });
 });
 
 describe('strength consumption and unequip', () => {
@@ -229,7 +251,7 @@ describe('strength consumption and unequip', () => {
       phase: 'combat',
       currentPlayerIndex: 0,
       activeSituation: { cardId: makeInstanceId('sit-02', 5), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
-      turnFlags: { enteredCombatThisTurn: true },
+      turnFlags: { enteredCombatThisTurn: true, askedHelpThisTurn: false },
       players: base.players.map((p) =>
         p.id === 'p1'
           ? { ...p, level: 5, strengths: ['str-01__900', 'str-02__901'], friendId: 'fnd-01__902', clubId: 'club-01__903', experienceHand: [], situationHand: [] }
@@ -255,7 +277,7 @@ describe('strength consumption and unequip', () => {
       phase: 'combat',
       currentPlayerIndex: 0,
       activeSituation: { cardId: makeInstanceId('sit-19', 9), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
-      turnFlags: { enteredCombatThisTurn: true },
+      turnFlags: { enteredCombatThisTurn: true, askedHelpThisTurn: false },
       players: base.players.map((p) => (p.id === 'p1' ? { ...p, level: 1, strengths: ['str-05__900'] } : p)),
     };
     const res = applyAction(s, { type: 'RESOLVE_COMBAT', playerId: 'p1' });
@@ -319,7 +341,7 @@ describe('failure discard consequences', () => {
       phase: 'combat',
       currentPlayerIndex: 0,
       activeSituation: { cardId: makeInstanceId('sit-03', 3), fromDeck: true, helperId: null, helperOfferedExperience: 0 },
-      turnFlags: { enteredCombatThisTurn: true },
+      turnFlags: { enteredCombatThisTurn: true, askedHelpThisTurn: false },
       // one equipped Strength, empty hands, so the only way to pay the discard is the equipped card
       players: base.players.map((p) => (p.id === 'p1' ? { ...p, strengths: ['str-01__700'], experienceHand: [], situationHand: [] } : p)),
     };

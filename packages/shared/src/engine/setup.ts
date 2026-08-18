@@ -79,6 +79,6 @@ export function createGame(playerSeeds: readonly PlayerSeed[], seed: number): Ga
     rngState,
     log: [{ id: 0, turn: 1, message: 'Players are choosing characters.' }],
     nextEventId: 1,
-    turnFlags: { enteredCombatThisTurn: false },
+    turnFlags: { enteredCombatThisTurn: false, askedHelpThisTurn: false },
   };
 }
