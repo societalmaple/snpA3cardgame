@@ -91,29 +91,6 @@
   transform: translateY(-1px);
 }
 
-.helpBtn {
-  width: 4.35rem;
-  height: 4.35rem;
-  border-radius: 50%;
-  border: 1px solid var(--panel-border);
-  background: var(--panel);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 2.25rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s, background 0.2s, border-color 0.2s, color 0.2s;
-}
-.helpBtn:hover {
-  transform: scale(1.1);
-  background: var(--input-bg);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
 .paletteSelector {
   display: flex;
   align-items: center;
@@ -535,11 +512,6 @@
     padding: 0.6rem 0.9rem;
     font-size: 1.15rem;
     min-height: 3rem;
-  }
-  .helpBtn {
-    width: 3.5rem;
-    height: 3.5rem;
-    font-size: 1.9rem;
   }
   .randomizeBtn,
   .bgBtn {

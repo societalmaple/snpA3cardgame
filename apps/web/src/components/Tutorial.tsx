@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore, fontScaleOf } from '../store.ts';
-import { TARGET_LEVEL, HAND_LIMIT } from '@school-days/shared';
+import { PlaceholderCard } from './PlaceholderCard.tsx';
+import { TARGET_LEVEL, MAX_SUPPORTS, HAND_LIMIT } from '@school-days/shared';
 import styles from './Tutorial.module.css';
 
 interface Step {
@@ -8,6 +9,8 @@ interface Step {
   body: string;
   /** data-tutorial zone on the game screen to spotlight; 'page' means the whole screen. */
   zone: string;
+  /** Example cards to show in the tooltip. */
+  cardIds?: string[];
 }
 
 const STEPS: Step[] = [
@@ -15,14 +18,13 @@ const STEPS: Step[] = [
     title: 'Welcome to Solve It!',
     body:
       `Race other players to Well-Being Level ${TARGET_LEVEL}. The level that wins must come from solving a ` +
-      'Situation. This short tour points at each part of the screen.',
+      'Situation. This short tour shows the screen and explains each card type.',
     zone: 'page',
   },
   {
     title: 'Top bar',
     body:
-      'Room code, turn number, and whose turn it is. The "Tutorial" button reopens this tour, and "?" opens the ' +
-      'full written rules.',
+      'Room code, turn number, and whose turn it is. You can reopen this tour anytime from the Tutorial button.',
     zone: 'topbar',
   },
   {
@@ -40,7 +42,7 @@ const STEPS: Step[] = [
   {
     title: 'Your cards',
     body:
-      `Your equipped cards and your two hands (Situation and Experience). You can hold up to ${HAND_LIMIT} cards. ` +
+      `Your equipped cards and two hands (Situation and Experience). You can hold up to ${HAND_LIMIT} cards. ` +
       'Click a highlighted card to play it.',
     zone: 'self',
   },
@@ -50,10 +52,57 @@ const STEPS: Step[] = [
     zone: 'log',
   },
   {
+    title: 'Situations',
+    body:
+      'Each turn you draw a Situation with a base difficulty and barriers. Solve it any way you can: a matching ' +
+      'Strength, a Support, a Self-Advocacy card, a Friend or Club, or a teammate. Solving it wins Levels and ' +
+      'Experience.',
+    zone: 'page',
+    cardIds: ['sit-01'],
+  },
+  {
+    title: 'Mess-Ups',
+    body:
+      'A Mess-Up is a barrier the environment threw up — not your fault. Fix it with a Support, Self-Advocacy, ' +
+      'Strength, or Friend, or endure a small temporary penalty.',
+    zone: 'page',
+    cardIds: ['msu-02'],
+  },
+  {
+    title: 'Characters & Strengths',
+    body:
+      'Your Character is a permanent ability you never lose. A Strength adds a base bonus PLUS a bigger bonus when ' +
+      'it fits the Situation, and is used up when you solve one.',
+    zone: 'page',
+    cardIds: ['char-01', 'str-01'],
+  },
+  {
+    title: 'Supports & Self-Advocacy',
+    body:
+      `Supports are tools that remove barriers (keep up to ${MAX_SUPPORTS} active at once). Self-Advocacy cards are ` +
+      'one-shot: asking for help changes the conditions and can cancel a consequence.',
+    zone: 'page',
+    cardIds: ['sup-03', 'sad-01'],
+  },
+  {
+    title: 'Friends & Clubs',
+    body:
+      'A Friend helps co-regulate and team up (limit 1). A Club is a caring community that finds places where your ' +
+      'strengths shine (limit 1).',
+    zone: 'page',
+    cardIds: ['fnd-03', 'club-01'],
+  },
+  {
+    title: 'Level Ups',
+    body: 'Level Up cards raise your Well-Being, but can never be the level that wins the game.',
+    zone: 'page',
+    cardIds: ['lvl-01'],
+  },
+  {
     title: "You're ready!",
     body:
       'On your turn: draw a Situation, lower its difficulty with your cards, then Resolve. Mess-Ups are just ' +
-      'barriers you can fix. Full details live behind "?". Have fun!',
+      'barriers you can fix. Have fun!',
     zone: 'page',
   },
 ];
@@ -152,6 +201,13 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
       : undefined;
 
   const tooltipStyle = centered ? undefined : tooltipStyleFor(rect);
+  const tooltipClass = [
+    styles.tooltip,
+    step.cardIds?.length ? styles.wide : '',
+    centered ? styles.centered : styles.anchored,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div
@@ -161,8 +217,8 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
       aria-modal="true"
       aria-label={`Tutorial step ${index + 1}: ${step.title}`}
     >
-      {isPage ? <div className={styles.dim} /> : rect ? <div className={styles.spot} style={spotStyle} /> : null}
-      <div className={`${styles.tooltip} ${centered ? styles.centered : styles.anchored}`} style={tooltipStyle}>
+      {isPage || !rect ? <div className={styles.dim} /> : <div className={styles.spot} style={spotStyle} />}
+      <div className={tooltipClass} style={tooltipStyle}>
         <header className={styles.header}>
           <h1 className={styles.title}>Interactive Tutorial</h1>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close tutorial">
@@ -175,6 +231,13 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
             {index + 1}. {step.title}
           </h2>
           <p className={styles.body}>{step.body}</p>
+          {step.cardIds && (
+            <div className={styles.cards}>
+              {step.cardIds.map((id) => (
+                <PlaceholderCard key={id} id={id} size="sm" />
+              ))}
+            </div>
+          )}
         </div>
 
         <footer className={styles.footer}>

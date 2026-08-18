@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { cardOf, type PlayerView, PALETTES } from '@school-days/shared';
 import { useStore, fontScaleOf } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
-import { HelpScreen } from './HelpScreen.tsx';
+import { Tutorial } from './Tutorial.tsx';
 import { FontSelect } from './FontSelect.tsx';
 import styles from './CharacterSelect.module.css';
 
 export function CharacterSelect({ view }: { view: PlayerView }) {
   const { sendAction, leave, palette, refreshPalette, setPalette, background, refreshBackground, font } = useStore();
-  const [showHelp, setShowHelp] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const me = view.you;
   const self = view.players.find((p) => p.id === me);
   const chosen = self?.characterId ?? null;
@@ -43,14 +43,13 @@ export function CharacterSelect({ view }: { view: PlayerView }) {
     '--player-item-border': palette.colors.playerItemBorder,
   } as React.CSSProperties;
 
-  if (showHelp) return <HelpScreen onClose={() => setShowHelp(false)} />;
-
   return (
     <div className={styles.wrap} style={cssVars}>
       <div className={styles.overlay} />
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
       <div className={styles.topbar}>
         <div className={styles.topLeft}>
-          <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to play">
+          <button className={styles.helpBtn} onClick={() => setShowTutorial(true)} aria-label="Interactive tutorial">
             ?
           </button>
           <button className={styles.leave} onClick={confirmLeave}>

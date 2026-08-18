@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MIN_PLAYERS, MAX_PLAYERS, PALETTES } from '@school-days/shared';
 import { useStore, fontScaleOf } from '../store.ts';
-import { HelpScreen } from './HelpScreen.tsx';
+import { Tutorial } from './Tutorial.tsx';
 import { FontSelect } from './FontSelect.tsx';
 import styles from './Lobby.module.css';
 
@@ -9,9 +9,9 @@ export function Lobby() {
   const { room, session, connected, createRoom, joinRoom, setReady, startGame, leave, palette, refreshPalette, setPalette, background, refreshBackground, font } = useStore();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
-  const [showHelp, setShowHelp] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
-  const toggleHelp = () => setShowHelp((open) => !open);
+  const toggleTutorial = () => setShowTutorial((open) => !open);
 
   const cssVars = {
     '--bg': palette.colors.background,
@@ -39,9 +39,6 @@ export function Lobby() {
     '--player-item-border': palette.colors.playerItemBorder,
   } as React.CSSProperties;
 
-  // Help opens as a full-screen overlay so the layout below never shifts.
-  if (showHelp) return <HelpScreen onClose={() => setShowHelp(false)} />;
-
   // Not in a room yet → create / join form.
   if (!room || !session) {
     return (
@@ -49,7 +46,7 @@ export function Lobby() {
         <div className={styles.overlay} />
         <div className={styles.topbar}>
           <div className={styles.paletteRow}>
-            <button className={styles.helpBtn} onClick={toggleHelp} aria-label="How to play" title="How to play">
+            <button className={styles.helpBtn} onClick={toggleTutorial} aria-label="Interactive tutorial" title="Interactive tutorial">
               ?
             </button>
             <select
@@ -109,6 +106,7 @@ export function Lobby() {
 
           {!connected && <p className={styles.warn}>Connecting to server…</p>}
         </div>
+        {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
       </div>
     );
   }
@@ -123,7 +121,7 @@ export function Lobby() {
       <div className={styles.overlay} />
       <div className={styles.topbar}>
         <div className={styles.paletteRow}>
-          <button className={styles.helpBtn} onClick={toggleHelp} aria-label="How to play" title="How to play">
+          <button className={styles.helpBtn} onClick={toggleTutorial} aria-label="Interactive tutorial" title="Interactive tutorial">
             ?
           </button>
           <select
@@ -182,6 +180,7 @@ export function Lobby() {
           <p className={styles.hint}>Need {MIN_PLAYERS}–{MAX_PLAYERS} players, everyone ready.</p>
         )}
       </div>
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
     </div>
   );
 }

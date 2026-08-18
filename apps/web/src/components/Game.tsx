@@ -3,7 +3,6 @@ import { HAND_LIMIT, type Action, type CardInstanceId, type PlayerView, PALETTES
 import { useStore, fontScaleOf } from '../store.ts';
 import { PlaceholderCard } from './PlaceholderCard.tsx';
 import { CharacterSelect } from './CharacterSelect.tsx';
-import { HelpScreen } from './HelpScreen.tsx';
 import { Tutorial } from './Tutorial.tsx';
 import { FontSelect } from './FontSelect.tsx';
 import { cardName } from '../cardDisplay.ts';
@@ -14,17 +13,9 @@ export function Game({ view }: { view: PlayerView }) {
   const { legal } = view;
   const [helpTarget, setHelpTarget] = useState('');
   const [offer, setOffer] = useState(0);
-  const [showHelp, setShowHelp] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
 
-  const toggleTutorial = () => {
-    setShowHelp(false);
-    setShowTutorial((open) => !open);
-  };
-  const toggleHelp = () => {
-    setShowTutorial(false);
-    setShowHelp((open) => !open);
-  };
+  const toggleTutorial = () => setShowTutorial((open) => !open);
 
   // Character selection happens before the board is shown.
   if (view.phase === 'character_select') return <CharacterSelect view={view} />;
@@ -104,9 +95,6 @@ export function Game({ view }: { view: PlayerView }) {
           <button className={styles.tutorialBtn} onClick={toggleTutorial} aria-label="Interactive tutorial" title="Interactive tutorial">
             Tutorial
           </button>
-          <button className={styles.helpBtn} onClick={toggleHelp} aria-label="How to play" title="How to play">
-            ?
-          </button>
           <button className={styles.leave} onClick={confirmLeave}>
             Leave
           </button>
@@ -135,7 +123,6 @@ export function Game({ view }: { view: PlayerView }) {
       </header>
 
       {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
-      {showHelp && <HelpScreen onClose={() => setShowHelp(false)} />}
 
       {winner && (
         <div className={styles.banner}>
