@@ -15,9 +15,9 @@
   font-size: calc(1rem * var(--font-scale, 1));
   /* Allow the card to shrink inside a row and always wrap text within it. */
   min-width: 0;
-  /* "anywhere" also affects min-content sizing, so wide text never forces the
-     card wider than its fixed width. */
-  overflow-wrap: anywhere;
+  /* "break-word" lets text wrap at spaces but never splits a word mid-word,
+     except when a single word is longer than the card itself. */
+  overflow-wrap: break-word;
   cursor: default;
 }
 
