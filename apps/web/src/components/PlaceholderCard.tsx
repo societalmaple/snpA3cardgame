@@ -1,5 +1,6 @@
 import { cardOf, selfAdvocacyForMessUp, type CardInstanceId } from '@school-days/shared';
 import { TYPE_LABEL, statLine, formatEffects, teachingText } from '../cardDisplay.ts';
+import { FitWords } from './FitWords.tsx';
 import styles from './PlaceholderCard.module.css';
 
 interface Props {
@@ -39,30 +40,32 @@ export function PlaceholderCard({ id, onClick, selected, disabled, size = 'md', 
 
   return (
     <button type="button" className={className} data-type={card.type} onClick={clickable ? onClick : undefined} disabled={disabled}>
-      <span className={styles.type}>{TYPE_LABEL[card.type]}</span>
+      <FitWords className={styles.type} text={TYPE_LABEL[card.type]} />
       {/* ── PLACEHOLDER ART: replace with real artwork for defIdOf(id) later ── */}
-      <span className={styles.art}>{card.art}</span>
-      <span className={styles.name}>{card.name}</span>
-      <span className={styles.stat}>{statLine(card)}</span>
+      <span className={styles.art}>
+        <FitWords text={card.art} />
+      </span>
+      <FitWords className={styles.name} text={card.name} />
+      <FitWords className={styles.stat} text={statLine(card)} />
       {card.type === 'situation' && card.barriers && card.barriers.length > 0 && (
-        <span className={styles.barriers}>Barriers: {card.barriers.join(', ')}</span>
+        <FitWords className={styles.barriers} text={`Barriers: ${card.barriers.join(', ')}`} />
       )}
       {card.type === 'situation' && card.consequences.length > 0 && (
-        <span className={styles.consequence}>Fail: {formatEffects(card.consequences)}</span>
+        <FitWords className={styles.consequence} text={`Fail: ${formatEffects(card.consequences)}`} />
       )}
       {card.type === 'situation' && card.validStrengths && card.validStrengths.length > 0 && (
-        <span className={styles.connection}>Strengths: {names(card.validStrengths)}</span>
+        <FitWords className={styles.connection} text={`Strengths: ${names(card.validStrengths)}`} />
       )}
       {card.type === 'situation' && card.validSupports && card.validSupports.length > 0 && (
-        <span className={styles.connection}>Supports: {names(card.validSupports)}</span>
+        <FitWords className={styles.connection} text={`Supports: ${names(card.validSupports)}`} />
       )}
       {card.type === 'situation' && card.validSelfAdvocacy && card.validSelfAdvocacy.length > 0 && (
-        <span className={styles.connection}>Self-Advocacy: {names(card.validSelfAdvocacy)}</span>
+        <FitWords className={styles.connection} text={`Self-Advocacy: ${names(card.validSelfAdvocacy)}`} />
       )}
       {card.type === 'messup' && card.mitigation && (
-        <span className={styles.connection}>Self-Advocacy: {names(selfAdvocacyForMessUp(card))}</span>
+        <FitWords className={styles.connection} text={`Self-Advocacy: ${names(selfAdvocacyForMessUp(card))}`} />
       )}
-      {teach && <span className={styles.teach}>{teach}</span>}
+      {teach && <FitWords className={styles.teach} text={teach} />}
     </button>
   );
 }
