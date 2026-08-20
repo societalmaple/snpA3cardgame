@@ -12,7 +12,7 @@ export function FontSelect() {
       title="Select font"
     >
       {FONTS.map((f) => (
-        <option key={f.name} value={f.family}>
+        <option key={f.name} value={f.family} style={{ fontFamily: f.family }}>
           {f.name}
         </option>
       ))}
